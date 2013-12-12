@@ -20,4 +20,4 @@ _This project is not usable yet!_
 4. Push to the branch (`git push origin my-new-feature`)
 5. Submit a Pull Request
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/sgeb/libopencash/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/opencash/libopencash/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
