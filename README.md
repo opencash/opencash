@@ -2,6 +2,20 @@
 
 A free open-source accounting software (early stage).
 
+### Project structure
+
+```
+.
+├── LICENSE.txt     # OpenCash's license (GPLv2)
+├── README.md       # This current file
+├── libopencash     # Shared core in C++
+├── opencash-cocoa  # Cocoa framework around libopencash
+├── opencash-ios    # iOS app built on top of opencash-cocoa
+├── opencash-osx    # Mac app built on top of opencash-cocoa
+└── opencash-xcode  # Xcode project to build opencash-coca, opencash-ios
+                    #   and opencash-osx
+```
+
 ### References to external repositories
 
 This project uses [`git subtree`](https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt) to pull in external repos. Currently the following externals are set up:
