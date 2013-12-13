@@ -2,6 +2,21 @@
 
 A free open-source accounting software (early stage).
 
+## How to build OpenCash (quick'n'dirty)
+
+1. Build `libopencash` for all platforms:
+       ```
+       cd libopencash
+       ./build.sh all Debug
+       ```
+
+2. Open the Xcode workspace:
+       ```
+       open opencash-xcode/OpenCash.xcworkspace
+       ```
+
+3. Manually trigger build for targets `OpenCash.framework`, `OpenCash-OSX` and `OpenCash-iOS`
+
 ### Project structure
 
 ```
