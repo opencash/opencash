@@ -15,7 +15,7 @@ make_targets="all"
 
 if [ "x$1" = "x-h" -o "x$1" = "x--help" ]
 then
-  echo "Usage: $(basename $0) [all|host|ios-device|ios-simulator|ios-universal|osx-ios-universal] [Debug|Release] [make_target_1 [make_target_2 [...]]]"
+  echo "Usage: $(basename $0) [all|host|ios-device|ios-simulator|ios-universal|osx-ios-universal|android] [Debug|Release] [make_target_1 [make_target_2 [...]]]"
   exit
 fi
 
@@ -38,7 +38,7 @@ fi
 
 if [ $platform = "all" ]
 then
-  platforms="host ios-device ios-simulator ios-universal osx-ios-universal"
+  platforms="host ios-device ios-simulator ios-universal osx-ios-universal android"
 elif [ $platform = "ios-universal" ]
 then
   platforms="ios-device ios-simulator ios-universal"
@@ -76,6 +76,23 @@ for p in $platforms; do
     echo "======"
   fi
 
+  if [ $p = "android" ]
+  then
+    if [ "x$ANDROID_STANDALONE_TOOLCHAIN" = "x" ]
+    then
+      echo "\$ANDROID_STANDALONE_TOOLCHAIN must be set to the path of your"
+      echo "Android standalone toolchain. You can generate one with the NDK"
+      echo "using build/tool/make-standalone-toolchain.sh"
+      echo "You must use a clang-based toolchain. Please see NDK docs."
+      echo
+      echo "Exiting."
+      exit 1
+    fi
+
+    PATH_OLD=$PATH
+    PATH=$ANDROID_STANDALONE_TOOLCHAIN/bin:$PATH
+  fi
+
   if [ $p = "ios-universal" ]
   then
     rm -rf "$p_out_dir"
@@ -101,10 +118,33 @@ for p in $platforms; do
   else
     [ $configuration = "Debug" ] && cmake_debug_arg="-DOC_DEBUG=ON"
     cmake $cmake_debug_arg -DOC_STATIC=ON -DOC_PLATFORM=$p "$parent_pwd" &&
-      make $make_targets &&
+      make $make_targets
+
+    # create the aggregated static library
+    if [ $p = "android" ]
+    then
+      tmp_file=$(mktemp -t ar)
+      echo "CREATE $p_out_lib_static_filename" >> $tmp_file
+      echo "ADDLIB $p_out_lib_dir/libPocoFoundation.a" >> $tmp_file
+      echo "ADDLIB $p_out_lib_dir/libodb.a" >> $tmp_file
+      echo "ADDLIB $p_out_lib_dir/libodb-sqlite.a" >> $tmp_file
+      echo "ADDLIB $p_out_lib_dir/libsqlite3.a" >> $tmp_file
+      echo "ADDLIB $p_out_lib_dir/libopencash.a" >> $tmp_file
+      echo "SAVE" >> $tmp_file
+      echo "END" >> $tmp_file
+      $ANDROID_STANDALONE_TOOLCHAIN/bin/arm-linux-androideabi-ar -M < $tmp_file
+      rm -rf $tmp_file
+    else
       rm -rf "$p_out_lib_static_filename" &&
       libtool -static -o "${p_out_lib_static_filename}.tmp" "${p_out_lib_dir}"/*.a >/dev/null &&
       mv "${p_out_lib_static_filename}.tmp" "${p_out_lib_static_filename}"
+    fi
+  fi
+
+  if [ "x$PATH_OLD" != "x" ]
+  then
+    PATH=$PATH_OLD
+    unset PATH_OLD
   fi
 
   echo "<== done platform '$p'"

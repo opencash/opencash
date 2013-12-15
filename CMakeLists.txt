@@ -7,7 +7,7 @@ set(OC_PROJECT_NAME "lib${OC_LIB_NAME}")
 option(OC_DEBUG "Build a debug version of ${OC_PROJECT_NAME} and its dependencies (default: build a release version)." OFF)
 option(OC_STATIC "Build a static version of ${OC_PROJECT_NAME} and its dependencies (default: enabled)." ON)
 option(OC_TESTS "Build all of ${OC_PROJECT_NAME}'s unit tests (default: OFF)." OFF)
-set(OC_PLATFORM "host" CACHE STRING "Build ${OC_PROJECT_NAME} for a particular platform. Options are 'host', 'ios-device' or 'ios-simulator' (default: host).")
+set(OC_PLATFORM "host" CACHE STRING "Build ${OC_PROJECT_NAME} for a particular platform. Options are 'host', 'ios-device', 'ios-simulator' or 'android' (default: host).")
 
 if(OC_DEBUG)
   set(CMAKE_BUILD_TYPE "Debug")
@@ -21,11 +21,13 @@ elseif(OC_PLATFORM STREQUAL "ios-device")
   set(OC_PLATFORM_IOS_DEVICE ON)
 elseif(OC_PLATFORM STREQUAL "ios-simulator")
   set(OC_PLATFORM_IOS_SIMULATOR ON)
+elseif(OC_PLATFORM STREQUAL "android")
+  set(OC_PLATFORM_ANDROID ON)
 else()
   message(FATAL_ERROR "OC_PLATFORM set to invalid value: '${OC_PLATFORM}'")
 endif()
 
-if(OC_PLATFORM_IOS_DEVICE OR OC_PLATFORM_IOS_SIMULATOR)
+if(NOT OC_PLATFORM_HOST)
   if(NOT OC_STATIC)
     set(OC_STATIC ON)
     message(WARNING "Setting OC_STATIC to ON for OC_PLATFORM '${OC_PLATFORM}'")
@@ -52,17 +54,34 @@ if(OC_PLATFORM_IOS_DEVICE OR OC_PLATFORM_IOS_SIMULATOR)
   include(ios-toolchain)
 endif()
 
+if(OC_PLATFORM_ANDROID)
+  set(ANDROID_COMPILER_IS_CLANG 1)
+  # Must be included before project declaration
+  include(android-toolchain)
+endif()
+
 # Project must be declared before adjustments to CMAKE_CXX_FLAGS
-project(${OC_PROJECT_NAME} CXX)
+project(${OC_PROJECT_NAME} C CXX)
 
 # -Wno-unknown-pragmas needed due to libodb custom #pragma db
-set(OC_CXX_ADDITIONAL_FLAGS "-Wall -std=c++11 -stdlib=libc++ -Wno-unknown-pragmas")
+set(OC_C_ADDITIONAL_FLAGS "-Wall -Wno-unknown-pragmas")
+set(OC_CXX_ADDITIONAL_FLAGS "-Wall -std=c++11 -Wno-unknown-pragmas")
+if(NOT OC_PLATFORM_ANDROID)
+  set(OC_CXX_ADDITIONAL_FLAGS "${OC_CXX_ADDITIONAL_FLAGS} -stdlib=libc++")
+endif()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OC_C_ADDITIONAL_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OC_CXX_ADDITIONAL_FLAGS}")
+
 if(OC_DEBUG)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG} -g -O0")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
 else()
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE} -g0")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE} -g0")
 endif(OC_DEBUG)
+
+set(CMAKE_C_FLAGS_DEBUG "")
+set(CMAKE_C_FLAGS_RELEASE "")
 set(CMAKE_CXX_FLAGS_DEBUG "")
 set(CMAKE_CXX_FLAGS_RELEASE "")
 
@@ -75,6 +94,7 @@ message(STATUS "OC_STATIC: ${OC_STATIC}")
 message(STATUS "OC_TESTS: ${OC_TESTS}")
 message(STATUS "OC_PLATFORM: ${OC_PLATFORM}")
 #message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+#message(STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
 
 include_directories(
   ./include/
