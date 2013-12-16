@@ -26,7 +26,7 @@ TEST(TestAccount, shouldAllowOneParent) {
   childAcc->setParent(parentAcc);
 
   // then
-  ASSERT_EQ(*parentAcc, *childAcc->getParent());
+  ASSERT_EQ(parentAcc, childAcc->getParent());
 }
 
 TEST(TestAccount, shouldAllowMultipleChildren) {
@@ -45,8 +45,30 @@ TEST(TestAccount, shouldAllowMultipleChildren) {
   childAcc2->setParent(parentAcc);
 
   // then
-  ASSERT_EQ(*childAcc1, *(parentAcc->getChildren().at(0).lock()));
-  ASSERT_EQ(*childAcc2, *(parentAcc->getChildren().at(1).lock()));
+  ASSERT_EQ(childAcc1, parentAcc->getChildren().at(0).lock());
+  ASSERT_EQ(childAcc2, parentAcc->getChildren().at(1).lock());
+  ASSERT_EQ(2, parentAcc->getChildren().size());
+}
+
+TEST(TestAccount, shouldRemoveChildWhenSettingParentToNull) {
+  // given
+  AccountPtr parentAcc(new Account(A_UUID));
+  parentAcc->setName("parent");
+
+  AccountPtr childAcc1(new Account(ANOTHER_UUID));
+  childAcc1->setName("child1");
+
+  AccountPtr childAcc2(new Account(YET_ANOTHER_UUID));
+  childAcc2->setName("child2");
+
+  // when
+  childAcc1->setParent(parentAcc);
+  childAcc2->setParent(parentAcc);
+  childAcc1->setParent(NULL);
+
+  // then
+  ASSERT_EQ(childAcc2, parentAcc->getChildren().at(0).lock());
+  ASSERT_EQ(1, parentAcc->getChildren().size());
 }
 
 TEST(TestAccount, shouldCompareEqualityBasedOnlyOnUuid) {
@@ -77,6 +99,29 @@ TEST(TestAccount, shouldCompareEqualityBasedOnlyOnUuid) {
   ASSERT_FALSE(a1 == a1DiffUuid);
 }
 
+TEST(TestAccount, shouldNotTriggerParentChangedWhenSettingToSameParent) {
+  // given
+  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAccRef(parentAcc);
+
+  AccountPtr childAcc1(new Account(ANOTHER_UUID));
+  MockModelObserver childObs1(*childAcc1);
+
+  {
+    InSequence dummy;
+
+    EXPECT_CALL(childObs1, willChange("parent"));
+    EXPECT_CALL(childObs1, didChange("parent"));
+  }
+
+  // when
+  childAcc1->setParent(parentAcc);
+  childAcc1->setParent(parentAccRef);
+
+  // then
+  // mock expectations implicitly verified
+}
+
 TEST(TestAccount, shouldTriggerMemberObserverEvents) {
   // given
   Account acc(A_UUID);
@@ -100,7 +145,8 @@ TEST(TestAccount, shouldTriggerMemberObserverEvents) {
   acc.setDescr("A descr");
   acc.setType(AccountType::Asset);
 
-  // then (mock expectations implicitly verified)
+  // then
+  // mock expectations implicitly verified
 }
 
 TEST(TestAccount, shouldTriggerParentChildrenObserverEvents) {
@@ -130,6 +176,11 @@ TEST(TestAccount, shouldTriggerParentChildrenObserverEvents) {
     EXPECT_CALL(parentObs, didChangeAtIndex("children", 1, Insertion));
     EXPECT_CALL(childObs2, didChange("parent"));
 
+    EXPECT_CALL(childObs2, willChange("parent"));
+    EXPECT_CALL(parentObs, willChangeAtIndex("children", 1, Removal));
+    EXPECT_CALL(parentObs, didChangeAtIndex("children", 1, Removal));
+    EXPECT_CALL(childObs2, didChange("parent"));
+
     EXPECT_CALL(childObs1, willChange("parent"));
     EXPECT_CALL(parentObs, willChangeAtIndex("children", 0, Removal));
     EXPECT_CALL(parentObs, didChangeAtIndex("children", 0, Removal));
@@ -139,7 +190,9 @@ TEST(TestAccount, shouldTriggerParentChildrenObserverEvents) {
   // when
   childAcc1->setParent(parentAcc);
   childAcc2->setParent(parentAcc);
+  childAcc2->setParent(NULL);
   childAcc1->setParent(NULL);
 
-  // then (mock expectations implicitly verified)
+  // then
+  // mock expectations implicitly verified
 }
