@@ -78,12 +78,17 @@ for p in $platforms; do
 
   if [ $p = "android" ]
   then
-    if [ "x$ANDROID_STANDALONE_TOOLCHAIN" = "x" ]
+    if [ "x$ANDROID_STANDALONE_TOOLCHAIN" = "x" -a ! -d /opt/android-toolchain ]
     then
-      echo "\$ANDROID_STANDALONE_TOOLCHAIN must be set to the path of your"
-      echo "Android standalone toolchain. You can generate one with the NDK"
-      echo "using build/tool/make-standalone-toolchain.sh"
-      echo "You must use a clang-based toolchain. Please see NDK docs."
+      echo "\$ANDROID_STANDALONE_TOOLCHAIN is not set and /opt/android-toolchain"
+      echo "does not exist (or is not a directory). You must either set"
+      echo "\$ANDROID_STANDALONE_TOOLCHAIN to the path of your Android"
+      echo "standalone toolchain, or symlink it from /opt/android-toolchain"
+      echo
+      echo "You can generate a standalone toolchain using the script"
+      echo "build/tool/make-standalone-toolchain.sh provided with the NDK."
+      echo "You must use a clang-based toolchain. Please refer to NDK docs"
+      echo "for more info."
       echo
       echo "Exiting."
       exit 1
