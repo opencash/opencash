@@ -19,9 +19,9 @@ add_executable(TestAccount
   TestAccount.cpp
 )
 target_link_libraries(TestAccount
-  ${OC_LIB_NAME}
   ${GTEST_LIBS}
   ${GMOCK_LIBS}
+  ${OC_LIB_NAME}
 )
 add_test(TestAccount TestAccount)
 
@@ -33,8 +33,8 @@ add_executable(TestDocumentController
   TestDocumentController.cpp
 )
 target_link_libraries(TestDocumentController
-  ${OC_LIB_NAME}
   ${GTEST_LIBS}
   ${GMOCK_LIBS}
+  ${OC_LIB_NAME}
 )
 add_test(TestDocumentController TestDocumentController)

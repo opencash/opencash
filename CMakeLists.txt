@@ -56,6 +56,7 @@ endif()
 
 if(OC_PLATFORM_ANDROID)
   set(ANDROID_COMPILER_IS_CLANG 1)
+  set(LIBRARY_OUTPUT_PATH_ROOT ${CMAKE_BINARY_DIR}/out CACHE PATH "root for library output" FORCE)
   # Must be included before project declaration
   include(android-toolchain)
 endif()

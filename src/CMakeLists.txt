@@ -65,8 +65,8 @@ add_library(${OC_LIB_NAME}
 
 target_link_libraries(${OC_LIB_NAME}
   PocoFoundation
-  odb
   odb-sqlite
+  odb
   sqlite3
 )
 
