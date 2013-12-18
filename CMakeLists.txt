@@ -65,6 +65,7 @@ if(OC_PLATFORM_IOS_DEVICE OR OC_PLATFORM_IOS_SIMULATOR)
 endif()
 
 if(OC_PLATFORM_ANDROID)
+  # the android standlone toolchain must contain clang
   set(ANDROID_COMPILER_IS_CLANG 1)
   set(LIBRARY_OUTPUT_PATH_ROOT ${CMAKE_BINARY_DIR}/out CACHE PATH "root for library output" FORCE)
   # Must be included before project declaration
@@ -77,6 +78,10 @@ project(${OC_PROJECT_NAME} C CXX)
 # -Wno-unknown-pragmas needed due to libodb custom #pragma db
 set(OC_C_ADDITIONAL_FLAGS "-Wall -Wno-unknown-pragmas")
 set(OC_CXX_ADDITIONAL_FLAGS "-Wall -std=c++11 -Wno-unknown-pragmas")
+if(NOT OC_PLATFORM_ANDROID)
+  set(OC_CXX_ADDITIONAL_FLAGS "${OC_CXX_ADDITIONAL_FLAGS} -stdlib=libc++")
+endif()
+
 
 # Compiler-specific C++11 activation.
 #if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
@@ -92,24 +97,12 @@ set(OC_CXX_ADDITIONAL_FLAGS "-Wall -std=c++11 -Wno-unknown-pragmas")
 #  message(FATAL_ERROR "Your C++ compiler does not support C++11 (CXX_COMPILER_ID='${CMAKE_CXX_COMPILER_ID}').")
 #endif()
 
-#if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-#  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-#  if(NOT (GCC_VERSION VERSION_GREATER 4.7 OR GCC_VERSION VERSION_EQUAL 4.7))
-#    message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.7 or greater.")
-#  endif()
-#elseif(("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang") OR
-#  ("${CMAKE_CXX_COMPILER_ID}" MATCHES "g\\+\\+" AND (OC_PLATFORM_IOS_DEVICE OR OC_PLATFORM_IOS_SIMULATOR)))
-#  set(OC_CXX_ADDITIONAL_FLAGS "${OC_CXX_ADDITIONAL_FLAGS} -stdlib=libc++")
-#else()
-#  message(FATAL_ERROR "Your C++ compiler does not support C++11 (CXX_COMPILER_ID='${CMAKE_CXX_COMPILER_ID}').")
-#endif()
-
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OC_C_ADDITIONAL_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OC_CXX_ADDITIONAL_FLAGS}")
 
 if(OC_DEBUG)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG} -v -g -O0")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG} -v -g -O0")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_DEBUG} -g -O0")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
 else()
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_FLAGS_RELEASE} -g0")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE} -g0")
