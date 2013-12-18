@@ -1,5 +1,6 @@
 language: cpp
 compiler:
-  - gcc
+  # need at least GCC 4.7 for C++11
+  #- gcc
   - clang
 script: "./build.sh host Debug all test"
