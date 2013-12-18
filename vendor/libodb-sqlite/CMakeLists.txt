@@ -39,10 +39,10 @@ ExternalProject_Add(libodb-sqlite
   BUILD_COMMAND make -j4 all
 
   # Wrap download, configure and build steps in a script to log output
-  LOG_DOWNLOAD ON
-  LOG_CONFIGURE ON
-  LOG_BUILD ON
-  LOG_INSTALL ON
+  LOG_DOWNLOAD ${OC_QUIET_EXTERNALPROJECT}
+  LOG_CONFIGURE ${OC_QUIET_EXTERNALPROJECT}
+  LOG_BUILD ${OC_QUIET_EXTERNALPROJECT}
+  LOG_INSTALL ${OC_QUIET_EXTERNALPROJECT}
 )
 
 if(OC_PLATFORM_ANDROID)
@@ -69,10 +69,10 @@ if(OC_PLATFORM_ANDROID)
     BUILD_COMMAND make -j4 all
 
     # Wrap download, configure and build steps in a script to log output
-    LOG_DOWNLOAD ON
-    LOG_CONFIGURE ON
-    LOG_BUILD ON
-    LOG_INSTALL ON
+    LOG_DOWNLOAD ${OC_QUIET_EXTERNALPROJECT}
+    LOG_CONFIGURE ${OC_QUIET_EXTERNALPROJECT}
+    LOG_BUILD ${OC_QUIET_EXTERNALPROJECT}
+    LOG_INSTALL ${OC_QUIET_EXTERNALPROJECT}
   )
 
   add_dependencies(libodb-sqlite libsqlite3)

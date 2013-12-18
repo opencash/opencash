@@ -4,10 +4,17 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(OC_LIB_NAME opencash)
 set(OC_PROJECT_NAME "lib${OC_LIB_NAME}")
 
+option(OC_VERBOSE "Print verbose build progress (default: off)." OFF)
 option(OC_DEBUG "Build a debug version of ${OC_PROJECT_NAME} and its dependencies (default: build a release version)." OFF)
 option(OC_STATIC "Build a static version of ${OC_PROJECT_NAME} and its dependencies (default: enabled)." ON)
 option(OC_TESTS "Build all of ${OC_PROJECT_NAME}'s unit tests (default: OFF)." OFF)
 set(OC_PLATFORM "host" CACHE STRING "Build ${OC_PROJECT_NAME} for a particular platform. Options are 'host', 'ios-device', 'ios-simulator' or 'android' (default: host).")
+
+if(OC_VERBOSE)
+  set(OC_QUIET_EXTERNALPROJECT OFF)
+else()
+  set(OC_QUIET_EXTERNALPROJECT ON)
+endif()
 
 if(OC_DEBUG)
   set(CMAKE_BUILD_TYPE "Debug")
@@ -93,12 +100,16 @@ set(OC_INSTALL_DIR ${CMAKE_BINARY_DIR}/out)
 set(OC_INSTALL_INCLUDE_DIR ${OC_INSTALL_DIR}/include)
 set(OC_INSTALL_LIB_DIR ${OC_INSTALL_DIR}/lib)
 
+message(STATUS "OC_VERBOSE: ${OC_VERBOSE}")
 message(STATUS "OC_DEBUG: ${OC_DEBUG}")
 message(STATUS "OC_STATIC: ${OC_STATIC}")
 message(STATUS "OC_TESTS: ${OC_TESTS}")
 message(STATUS "OC_PLATFORM: ${OC_PLATFORM}")
-#message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-#message(STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
+
+if(OC_VERBOSE)
+  message(STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
+  message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+endif()
 
 include_directories(
   ./include/
