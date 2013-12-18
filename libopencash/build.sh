@@ -1,6 +1,10 @@
 #!/bin/bash
 
+# Enable echo of each command (for debug)
 #set -x
+
+# Exit with error if any command fails
+set -e
 
 is_ios_simulator_ar_avail()
 {
