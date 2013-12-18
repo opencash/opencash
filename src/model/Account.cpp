@@ -62,7 +62,7 @@ namespace opencash { namespace model {
 
   void Account::setParent(AccountPtr parent)
   {
-    if (&*parent == &*_parent) { return; }
+    if (parent == _parent) { return; }
 
     using ChangeType = opencash::model::ObservableModel::ChangeType;
 
@@ -72,13 +72,13 @@ namespace opencash { namespace model {
     if (_parent) {
       auto index = std::numeric_limits<std::size_t>::max();
 
-      auto children = _parent->_children;
-      auto child = find_if(children.cbegin(), children.cend(),
-          [this](decltype(*children.cbegin()) item) {
-            return (&*(item.lock()) == this);
+      WeakAccounts & children = _parent->_children;
+      auto child = std::find_if(children.begin(), children.end(),
+          [this](AccountWeakPtr item) {
+            return (item.lock().get() == this);
           });
-      if (child != children.cend()) {
-        index = child - children.cbegin();
+      if (child != children.end()) {
+        index = distance(children.begin(), child);
 
         _parent->willChangeAtIndex("children", index, ChangeType::Removal);
         children.erase(child);

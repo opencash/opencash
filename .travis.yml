@@ -1,0 +1,6 @@
+# placeholder to trigger first build
+language: cpp
+compiler:
+  - gcc
+  - clang
+script: "./build.sh host Debug all test"

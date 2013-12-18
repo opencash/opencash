@@ -33,7 +33,7 @@ foreach(_model ${ODB_MODELS})
   list(APPEND ODB_DEPENDS "../include/opencash/model/${_model}.h")
 endforeach()
 
-if(OC_PLATFORM_IOS_DEVICE OR OC_PLATFORM_IOS_SIMULATOR)
+if(NOT OC_PLATFORM_HOST)
   find_host_program(ODB_EXECUTABLE odb)
 else()
   find_program(ODB_EXECUTABLE odb)
@@ -65,8 +65,8 @@ add_library(${OC_LIB_NAME}
 
 target_link_libraries(${OC_LIB_NAME}
   PocoFoundation
-  odb
   odb-sqlite
+  odb
   sqlite3
 )
 

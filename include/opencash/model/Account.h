@@ -20,8 +20,9 @@ namespace opencash { namespace model {
 
     public:
       using AccountPtr = std::shared_ptr<Account>;
+      using AccountWeakPtr = std::weak_ptr<Account>;
       using Accounts = std::vector<AccountPtr>;
-      using WeakAccounts = std::vector<std::weak_ptr<Account>>;
+      using WeakAccounts = std::vector<AccountWeakPtr>;
 
       enum class AccountType {
         None,
