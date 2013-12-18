@@ -129,8 +129,8 @@ for p in $platforms; do
 
   else
     [ $configuration = "Debug" ] && cmake_debug_arg="-DOC_DEBUG=ON"
-    cmake $cmake_debug_arg -DOC_TESTS=ON -DOC_STATIC=ON -DOC_PLATFORM=$p "$parent_pwd" &&
-      make $make_targets
+    cmake $cmake_debug_arg -DOC_TESTS=ON -DOC_STATIC=ON -DOC_PLATFORM=$p "$parent_pwd"
+    make $make_targets
 
     # create the aggregated static library
     if [ $p = "android" ]
@@ -147,8 +147,8 @@ for p in $platforms; do
       arm-linux-androideabi-ar -M < $tmp_file
       rm -rf $tmp_file
     else
-      rm -rf "$p_out_lib_static_filename" &&
-      libtool -static -o "${p_out_lib_static_filename}.tmp" "${p_out_lib_dir}"/*.a >/dev/null &&
+      rm -rf "$p_out_lib_static_filename"
+      libtool -static -o "${p_out_lib_static_filename}.tmp" "${p_out_lib_dir}"/*.a >/dev/null
       mv "${p_out_lib_static_filename}.tmp" "${p_out_lib_static_filename}"
     fi
   fi
