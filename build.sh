@@ -94,8 +94,11 @@ for p in $platforms; do
       exit 1
     fi
 
+    # Set PATH. Value set in $ANDROID_STANDALONE_TOOLCHAIN
+    # overrides /opt/android-toolchain
     PATH_OLD=$PATH
-    PATH=$ANDROID_STANDALONE_TOOLCHAIN/bin:$PATH
+    [ -d /opt/android-toolchain ] && PATH=/opt/android-toolchain/bin:$PATH
+    [ "x$ANDROID_STANDALONE_TOOLCHAIN" != "x" ] && PATH=$ANDROID_STANDALONE_TOOLCHAIN/bin:$PATH
   fi
 
   if [ $p = "ios-universal" ]
@@ -122,7 +125,7 @@ for p in $platforms; do
 
   else
     [ $configuration = "Debug" ] && cmake_debug_arg="-DOC_DEBUG=ON"
-    cmake $cmake_debug_arg -DOC_STATIC=ON -DOC_PLATFORM=$p "$parent_pwd" &&
+    cmake $cmake_debug_arg -DOC_TESTS=ON -DOC_STATIC=ON -DOC_PLATFORM=$p "$parent_pwd" &&
       make $make_targets
 
     # create the aggregated static library
@@ -137,7 +140,7 @@ for p in $platforms; do
       echo "ADDLIB $p_out_lib_dir/libopencash.a" >> $tmp_file
       echo "SAVE" >> $tmp_file
       echo "END" >> $tmp_file
-      $ANDROID_STANDALONE_TOOLCHAIN/bin/arm-linux-androideabi-ar -M < $tmp_file
+      arm-linux-androideabi-ar -M < $tmp_file
       rm -rf $tmp_file
     else
       rm -rf "$p_out_lib_static_filename" &&

@@ -23,8 +23,10 @@ elseif(OC_PLATFORM_ANDROID)
 endif()
 
 ExternalProject_Add(poco
-  URL http://pocoproject.org/releases/poco-1.4.6/poco-1.4.6p2.tar.gz
-  URL_MD5 33f6a0b7e7fd6b86a1028b1e7fa78b84
+  URL https://github.com/pocoproject/poco/archive/poco-1.5.2-release.tar.gz
+  URL_MD5 4ed751311fe4eb437a485139fcfdf558
+  # URL http://pocoproject.org/releases/poco-1.4.6/poco-1.4.6p2.tar.gz
+  # URL_MD6 33f6a0b7e7fd6b86a1028b1e7fa78b84
   SOURCE_DIR ${PROJECT_BINARY_DIR}/src/poco
 
   PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
@@ -32,13 +34,23 @@ ExternalProject_Add(poco
   UPDATE_COMMAND ""
   BUILD_IN_SOURCE 1
 
-  # Unfortunately the poco Makefile isn't as flexible as we'd like, so we copy
-  # our own Makefile extensions to the source dir
-  PATCH_COMMAND ${CMAKE_COMMAND} -E copy
-    "${CMAKE_CURRENT_SOURCE_DIR}/Makefile-custom" <SOURCE_DIR>/Makefile-custom
+  PATCH_COMMAND
+    # Unfortunately the poco Makefile isn't as flexible as we'd like, so we copy
+    # our own Makefile extensions to the source dir
+    ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/Makefile-custom" <SOURCE_DIR>/Makefile-custom
+    # Make clang use C++11 atomic
+    COMMAND
+    patch -p1 -t -N < ${CMAKE_CURRENT_SOURCE_DIR}/clang_3_1-c++11_atomic.patch
+    # Fix a bug in Error.cpp, until it gets merged into upstream
+    # A similar PR has been submitted at upstream: https://github.com/pocoproject/poco/pull/319
+    COMMAND
+    patch -p1 -t -N < ${CMAKE_CURRENT_SOURCE_DIR}/android_strerror_r.patch
 
-  CONFIGURE_COMMAND <SOURCE_DIR>/configure --no-tests --no-samples
-    --prefix=<INSTALL_DIR> ${CONFIGURE_ARGS}
+  CONFIGURE_COMMAND <SOURCE_DIR>/configure
+    --no-tests
+    --no-samples
+    --prefix=<INSTALL_DIR>
+    ${CONFIGURE_ARGS}
 
   # Source our custom Makefile before building
   BUILD_COMMAND make -f Makefile -f Makefile-custom -j4 ${BUILD_TARGET}
