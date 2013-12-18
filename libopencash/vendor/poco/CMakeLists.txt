@@ -57,8 +57,8 @@ ExternalProject_Add(poco
   INSTALL_COMMAND make -f Makefile -f Makefile-custom my_install
 
   # Wrap download, configure and build steps in a script to log output
-  LOG_DOWNLOAD ON
-  LOG_CONFIGURE ON
-  LOG_BUILD ON
-  LOG_INSTALL ON
+  LOG_DOWNLOAD ${OC_QUIET_EXTERNALPROJECT}
+  LOG_CONFIGURE ${OC_QUIET_EXTERNALPROJECT}
+  LOG_BUILD ${OC_QUIET_EXTERNALPROJECT}
+  LOG_INSTALL ${OC_QUIET_EXTERNALPROJECT}
 )

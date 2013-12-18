@@ -17,10 +17,22 @@ platform="all"
 configuration="Debug"
 make_targets="all"
 
-if [ "x$1" = "x-h" -o "x$1" = "x--help" ]
+if [ "x$1" = "x-h" -o "x$1" = "x--help" -o $# -eq 0 ]
 then
-  echo "Usage: $(basename $0) [all|host|ios-device|ios-simulator|ios-universal|osx-ios-universal|android] [Debug|Release] [make_target_1 [make_target_2 [...]]]"
+  echo "Usage: $(basename $0) [-v|--verbose] [all|host|ios-device|ios-simulator|ios-universal|osx-ios-universal|android] [Debug|Release] [make_target_1 [make_target_2 [...]]]"
   exit
+fi
+
+[ "x$OC_VERBOSE" = "x" ] && OC_VERBOSE=OFF
+if [ "x$TRAVIS" != "x" ]
+then
+  # Always verbose when running in Travis CI
+  OC_VERBOSE=ON
+fi
+if [ "x$1" = "x-v" -o "x$1" = "x--verbose" ]
+then
+  OC_VERBOSE=ON
+  shift
 fi
 
 if [ $# -ge 1 ]
@@ -129,8 +141,9 @@ for p in $platforms; do
 
   else
     [ $configuration = "Debug" ] && cmake_debug_arg="-DOC_DEBUG=ON"
-    cmake $cmake_debug_arg -DOC_TESTS=ON -DOC_STATIC=ON -DOC_PLATFORM=$p "$parent_pwd"
-    make $make_targets
+    cmake $cmake_debug_arg -DOC_VERBOSE=$OC_VERBOSE -DOC_TESTS=ON -DOC_STATIC=ON -DOC_PLATFORM=$p "$parent_pwd"
+    [ $OC_VERBOSE = "ON" ] && make_verbose_arg="VERBOSE=1"
+    make $make_targets $make_verbose_arg
 
     # create the aggregated static library
     if [ $p = "android" ]
