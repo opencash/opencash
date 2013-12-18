@@ -9,11 +9,11 @@ else()
 endif()
 
 if(OC_PLATFORM_IOS_DEVICE)
-  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=armv7 --build=x86_64 --disable-threads)
+  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=armv7 --build=x86_64)
 elseif(OC_PLATFORM_IOS_SIMULATOR)
-  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=i386 --build=x86_64 --disable-threads)
+  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=i386 --build=x86_64)
 elseif(OC_PLATFORM_ANDROID)
-  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=arm-linux-androideabi --build=x86_64 --disable-threads)
+  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=arm-linux-androideabi --build=x86_64)
 endif()
 
 ExternalProject_Add(libodb
@@ -30,6 +30,7 @@ ExternalProject_Add(libodb
 
   CONFIGURE_COMMAND <SOURCE_DIR>/configure
     --prefix=<INSTALL_DIR>
+    --disable-threads
     CXX=${CMAKE_CXX_COMPILER}
     CXXFLAGS=${CMAKE_CXX_FLAGS}
     ${CONFIGURE_ARGS}
