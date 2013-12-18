@@ -18,7 +18,8 @@ endif()
 
 ExternalProject_Add(libodb-sqlite
   URL http://www.codesynthesis.com/download/odb/2.3/libodb-sqlite-2.3.0.tar.gz
-  URL_HASH SHA1=2643d3c2c3f273f3fb223759e4ad10635cc91ce8
+  URL_MD5 e893668bc9f906e06576d720bb1992e4
+  #URL_HASH SHA1=2643d3c2c3f273f3fb223759e4ad10635cc91ce8
   SOURCE_DIR ${PROJECT_BINARY_DIR}/src/libodb-sqlite
 
   PREFIX "${CMAKE_CURRENT_BINARY_DIR}"

@@ -18,7 +18,8 @@ endif()
 
 ExternalProject_Add(libodb
   URL http://www.codesynthesis.com/download/odb/2.3/libodb-2.3.0.tar.gz
-  URL_HASH SHA1=8ac9a09a6a86e73951289ee79c022661caea7f96
+  URL_MD5 85cc1c357d8791b684f41c4c8801be55
+  #URL_HASH SHA1=8ac9a09a6a86e73951289ee79c022661caea7f96
   SOURCE_DIR ${PROJECT_BINARY_DIR}/src/libodb
 
   PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
