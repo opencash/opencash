@@ -1,6 +1,9 @@
 #include "opencash/controller/DocumentController.h"
 #include "generated/Account-odb.hxx"
 #include "generated/AccountsMeta-odb.hxx"
+#include "generated/Transaction-odb.hxx"
+#include "generated/TransactionsMeta-odb.hxx"
+#include "generated/Split-odb.hxx"
 
 #include <odb/database.hxx>
 #include <odb/sqlite/database.hxx>
@@ -17,18 +20,17 @@ namespace opencash { namespace controller {
 
   using namespace odb::core;
 
-  using Account = opencash::model::Account;
-  using AccountType = opencash::model::Account::AccountType;
-  using AccountPtr = opencash::model::Account::AccountPtr;
-  using Accounts = opencash::model::Account::Accounts;
-  using AccountsMeta = opencash::model::AccountsMeta;
+  IMPORT_ALIAS(Account);
+  IMPORT_ALIAS(Split);
+  IMPORT_ALIAS(Transaction);
 
   DocumentController::DocumentController(
       const std::string & dbFilename,
       bool shouldInitialize
       ) :
     _dbFilename(dbFilename),
-    _accountsMeta(new AccountsMeta()),
+    _accountsMeta(new model::AccountsMeta()),
+    _transactionsMeta(new model::TransactionsMeta()),
     _db(new odb::sqlite::database(dbFilename,
           SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE))
   {
@@ -37,37 +39,87 @@ namespace opencash { namespace controller {
     }
   }
 
-  AccountsMeta * DocumentController::getAccountsMeta() const
+  model::AccountsMeta* DocumentController::getAccountsMeta() const
   {
     return _accountsMeta.get();
   }
 
-  std::unique_ptr<Accounts> DocumentController::retrieveAccounts() const
-  {
-    std::unique_ptr<Accounts> ret(new Accounts);
+  Accounts DocumentController::retrieveAccounts() const {
+    using result = odb::result<Account>;
+    using query = odb::query<Account>;  
+
+    Accounts ret;
 
     session s;
-    transaction t(_db->begin());
-    auto r(_db->query<Account>());
-    for (auto i(r.begin()); i != r.end(); ++i)
-    {
-      ret->push_back(AccountPtr(i.load()));
-    }
-    t.commit();
+    transaction tx(_db->begin());
+    result res(_db->query<Account>());
+    
+    for (result::iterator it = res.begin(); it != res.end(); ++it)
+      ret.push_back(it.load());
+
+    tx.commit();
 
     return ret;
   }
 
-  AccountPtr DocumentController::newAccount() const
-  {
-    Poco::UUIDGenerator & generator = Poco::UUIDGenerator::defaultGenerator();
-    Poco::UUID uuid(generator.createOne());
-    // TODO: make sure this UUID doesn't exist in DB yet
-    return AccountPtr(new Account(uuid.toString()));
+  Splits DocumentController::retrieveSplits() const {
+    using result = odb::result<Split>;
+    using query = odb::query<Split>;  
+
+    Splits splits;
+
+    session s;
+    transaction tx(_db->begin());
+    result res(_db->query<Split>());
+
+    for(result::iterator it = res.begin(); it != res.end(); ++it)
+      splits.push_back(it.load());
+
+    tx.commit();
+
+
+    return splits;
   }
 
-  void DocumentController::persistAccount(const Account & account)
+  Transactions DocumentController::retrieveTransactions() const {
+    using result = odb::result<Transaction>;
+    using query = odb::query<Transaction>;  
+
+    Transactions transactions;
+
+    session s;
+    transaction tx(_db->begin());
+    result res(_db->query<Transaction>());
+
+    for(result::iterator it = res.begin(); it != res.end(); ++it)
+      transactions.push_back(it.load());
+
+    tx.commit();
+
+    return transactions;
+  }
+
+  static std::string newUUID() {
+    Poco::UUIDGenerator & generator = Poco::UUIDGenerator::defaultGenerator();
+    Poco::UUID uuid(generator.createOne());
+    return uuid.toString();    
+  }
+
+  AccountPtr DocumentController::newAccount() const
   {
+    // TODO: make sure this UUID doesn't exist in DB yet
+    return AccountPtr(new Account(newUUID()));
+  }
+
+  SplitPtr DocumentController::newSplit() const {
+    return SplitPtr(new Split(newUUID()));
+  }
+
+  TransactionPtr DocumentController::newTransaction() const {
+    return TransactionPtr(new Transaction(newUUID()));
+  }
+
+  void DocumentController::persistAccount(const Account & account) {
     transaction t(_db->begin());
     _db->persist(account);
     t.commit();
@@ -75,26 +127,60 @@ namespace opencash { namespace controller {
     updateAccountsMeta();
   }
 
-  void DocumentController::initializeDocument()
-  {
-    auto acc = newAccount();
-    acc->setName("Root Account");
-    acc->setDescr("A pseudo account to represent the root of the account structure");
-    acc->setType(AccountType::Root);
-
+  void DocumentController::persistSplit(const Split& split) {
     transaction t(_db->begin());
-    schema_catalog::create_schema(*_db);
-    _db->persist(*acc);
+    _db->persist(split);
+    t.commit();
+  }
+
+  void DocumentController::persistTransaction(const Transaction& tx) {
+    transaction t(_db->begin());
+    _db->persist(tx);
     t.commit();
 
+    updateTransactionsMeta();
+  }
+
+  void DocumentController::initializeDocument()
+  {
+    // {
+    //   transaction t(_db->begin());
+    //   schema_catalog::drop_schema(*_db);
+    //   t.commit();
+    // }
+    {
+      transaction t(_db->begin());
+      schema_catalog::create_schema(*_db);
+      t.commit();
+    }
+    {
+      auto acc = newAccount();
+      acc->setName("Root Account");
+      acc->setDescr("A pseudo account to represent the root of the account structure");
+      acc->setType(Account::AccountType::Root);
+
+      transaction t(_db->begin());
+      _db->persist(acc);
+      t.commit();
+    }
+
     updateAccountsMeta();
+    updateTransactionsMeta();
   }
 
   void DocumentController::updateAccountsMeta()
   {
     transaction t(_db->begin());
-    odb::result<AccountsMeta> r(_db->query<AccountsMeta>());
+    odb::result<model::AccountsMeta> r(_db->query<model::AccountsMeta>());
     r.begin().load(*_accountsMeta);
+    t.commit();
+  }
+
+  void DocumentController::updateTransactionsMeta()
+  {
+    transaction t(_db->begin());
+    odb::result<model::TransactionsMeta> r(_db->query<model::TransactionsMeta>());
+    r.begin().load(*_transactionsMeta);
     t.commit();
   }
 
