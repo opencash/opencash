@@ -1,12 +1,12 @@
 #include "opencash/model/Account.h"
+#include "opencash/model/Split.h"
 #include "mock/MockModelObserver.h"
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-using Account = opencash::model::Account;
-using AccountType = opencash::model::Account::AccountType;
-using AccountPtr = opencash::model::Account::AccountPtr;
+IMPORT_ALIAS(Account);
+IMPORT_ALIAS(Split);
 
 using InSequence = ::testing::InSequence;
 
@@ -99,6 +99,23 @@ TEST(TestAccount, shouldCompareEqualityBasedOnlyOnUuid) {
   ASSERT_FALSE(a1 == a1DiffUuid);
 }
 
+TEST(TestTransaction, shouldAddSplitIntoAccount) {
+  //given
+  AccountPtr account(new Account(A_UUID));
+  SplitPtr split1(new Split(ANOTHER_UUID));
+  SplitPtr split2(new Split(YET_ANOTHER_UUID));
+
+  //when
+  account->addSplit(split1);
+  account->addSplit(split2);
+
+  //then
+  const Splits& splits = account->getSplits();
+  ASSERT_EQ(2, splits.size());
+  ASSERT_EQ(split1, splits[0]);
+  ASSERT_EQ(split2, splits[1]);
+}
+
 TEST(TestAccount, shouldNotTriggerParentChangedWhenSettingToSameParent) {
   // given
   AccountPtr parentAcc(new Account(A_UUID));
@@ -143,7 +160,7 @@ TEST(TestAccount, shouldTriggerMemberObserverEvents) {
   // when
   acc.setName("A name");
   acc.setDescr("A descr");
-  acc.setType(AccountType::Asset);
+  acc.setType(Account::AccountType::Asset);
 
   // then
   // mock expectations implicitly verified

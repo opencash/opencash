@@ -4,9 +4,9 @@
 
 #include <odb/pre.hxx>
 
-#include <generated/Account-odb.hxx>
+#include <generated/Transaction-odb.hxx>
+#include "generated/Account-odb.hxx"
 #include "generated/Split-odb.hxx"
-#include "generated/Transaction-odb.hxx"
 
 #include <cassert>
 #include <cstring>  // std::memcpy
@@ -26,17 +26,11 @@
 
 namespace odb
 {
-  // Account
+  // Transaction
   //
 
-  const char alias_traits<  ::opencash::model::Account,
-    id_sqlite,
-    access::object_traits_impl< ::opencash::model::Account, id_sqlite >::parent_tag>::
-  table_name[] = "\"parent\"";
-
-  struct access::object_traits_impl< ::opencash::model::Account, id_sqlite >::extra_statement_cache_type
+  struct access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::extra_statement_cache_type
   {
-    sqlite::container_statements_impl< children_traits > _children;
     sqlite::container_statements_impl< splits_traits > _splits;
 
     extra_statement_cache_type (
@@ -44,224 +38,30 @@ namespace odb
       image_type&,
       sqlite::binding& id,
       sqlite::binding&)
-    : _children (c, id),
-      _splits (c, id)
+    : _splits (c, id)
     {
     }
   };
 
-  // _children
-  //
-
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::children_traits::
-  select_statement[] =
-  "SELECT "
-  "\"accounts\".\"uuid\" "
-  "FROM \"accounts\" "
-  "WHERE \"accounts\".\"parent\"=?";
-
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::children_traits::
-  insert_statement[] =
-  "";
-
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::children_traits::
-  delete_statement[] =
-  "";
-
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::children_traits::
-  bind (sqlite::bind* b,
-        const sqlite::bind* id,
-        std::size_t id_size,
-        data_image_type& d)
-  {
-    using namespace sqlite;
-
-    statement_kind sk (statement_select);
-    ODB_POTENTIALLY_UNUSED (sk);
-
-    size_t n (0);
-
-    // object_id
-    //
-    if (id != 0)
-      std::memcpy (&b[n], id, id_size * sizeof (id[0]));
-    n += id_size;
-
-    // value
-    //
-    b[n].type = sqlite::image_traits<
-      ::std::string,
-      sqlite::id_text>::bind_value;
-    b[n].buffer = d.value_value.data ();
-    b[n].size = &d.value_size;
-    b[n].capacity = d.value_value.capacity ();
-    b[n].is_null = &d.value_null;
-  }
-
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::children_traits::
-  grow (data_image_type& i,
-        bool* t)
-  {
-    bool grew (false);
-
-    // value
-    //
-    if (t[0UL])
-    {
-      i.value_value.capacity (i.value_size);
-      grew = true;
-    }
-
-    if (grew)
-      i.version++;
-  }
-
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::children_traits::
-  init (value_type& v,
-        const data_image_type& i,
-        database* db)
-  {
-    ODB_POTENTIALLY_UNUSED (db);
-
-    // value
-    //
-    {
-      typedef object_traits< ::opencash::model::Account > obj_traits;
-      typedef odb::pointer_traits< value_type > ptr_traits;
-
-      if (i.value_null)
-        v = ptr_traits::pointer_type ();
-      else
-      {
-        obj_traits::id_type id;
-        sqlite::value_traits<
-            obj_traits::id_type,
-            sqlite::id_text >::set_value (
-          id,
-          i.value_value,
-          i.value_size,
-          i.value_null);
-
-        // If a compiler error points to the line below, then
-        // it most likely means that a pointer used in a member
-        // cannot be initialized from an object pointer.
-        //
-        v = ptr_traits::pointer_type (
-          static_cast<sqlite::database*> (db)->load<
-            obj_traits::object_type > (id));
-
-        if (odb::pointer_traits<ptr_traits::strong_pointer_type>::null_ptr (
-              ptr_traits::lock (v)))
-          throw session_required ();
-      }
-    }
-  }
-
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::children_traits::
-  insert (index_type, const value_type&, void*)
-  {
-  }
-
-  bool access::object_traits_impl< ::opencash::model::Account, id_sqlite >::children_traits::
-  select (index_type&, value_type& v, void* d)
-  {
-    using namespace sqlite;
-    using sqlite::select_statement;
-
-    statements_type& sts (*static_cast< statements_type* > (d));
-    data_image_type& di (sts.data_image ());
-
-    init (v, di, &sts.connection ().database ());
-
-    if (sts.data_binding_test_version ())
-    {
-      const binding& id (sts.id_binding ());
-      bind (sts.data_bind (), id.bind, id.count, di);
-      sts.data_binding_update_version ();
-    }
-
-    select_statement& st (sts.select_statement ());
-    select_statement::result r (st.fetch ());
-
-    if (r == select_statement::truncated)
-    {
-      grow (di, sts.select_image_truncated ());
-
-      if (sts.data_binding_test_version ())
-      {
-        bind (sts.data_bind (), 0, sts.id_binding ().count, di);
-        sts.data_binding_update_version ();
-        st.refetch ();
-      }
-    }
-
-    return r != select_statement::no_data;
-  }
-
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::children_traits::
-  delete_ (void*)
-  {
-  }
-
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::children_traits::
-  load (container_type& c,
-        statements_type& sts)
-  {
-    using namespace sqlite;
-    using sqlite::select_statement;
-
-    const binding& id (sts.id_binding ());
-
-    if (sts.data_binding_test_version ())
-    {
-      bind (sts.data_bind (), id.bind, id.count, sts.data_image ());
-      sts.data_binding_update_version ();
-    }
-
-    select_statement& st (sts.select_statement ());
-    st.execute ();
-    auto_result ar (st);
-    select_statement::result r (st.fetch ());
-
-    if (r == select_statement::truncated)
-    {
-      data_image_type& di (sts.data_image ());
-      grow (di, sts.select_image_truncated ());
-
-      if (sts.data_binding_test_version ())
-      {
-        bind (sts.data_bind (), 0, id.count, di);
-        sts.data_binding_update_version ();
-        st.refetch ();
-      }
-    }
-
-    bool more (r != select_statement::no_data);
-
-    functions_type& fs (sts.functions ());
-    fs.ordered_ = false;
-    container_traits_type::load (c, more, fs);
-  }
-
   // _splits
   //
 
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::splits_traits::
+  const char access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::splits_traits::
   select_statement[] =
   "SELECT "
   "\"splits\".\"uuid\" "
   "FROM \"splits\" "
-  "WHERE \"splits\".\"account\"=?";
+  "WHERE \"splits\".\"transaction\"=?";
 
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::splits_traits::
+  const char access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::splits_traits::
   insert_statement[] =
   "";
 
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::splits_traits::
+  const char access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::splits_traits::
   delete_statement[] =
   "";
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::splits_traits::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::splits_traits::
   bind (sqlite::bind* b,
         const sqlite::bind* id,
         std::size_t id_size,
@@ -291,7 +91,7 @@ namespace odb
     b[n].is_null = &d.value_null;
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::splits_traits::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::splits_traits::
   grow (data_image_type& i,
         bool* t)
   {
@@ -309,7 +109,7 @@ namespace odb
       i.version++;
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::splits_traits::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::splits_traits::
   init (value_type& v,
         const data_image_type& i,
         database* db)
@@ -346,12 +146,12 @@ namespace odb
     }
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::splits_traits::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::splits_traits::
   insert (index_type, const value_type&, void*)
   {
   }
 
-  bool access::object_traits_impl< ::opencash::model::Account, id_sqlite >::splits_traits::
+  bool access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::splits_traits::
   select (index_type&, value_type& v, void* d)
   {
     using namespace sqlite;
@@ -387,12 +187,12 @@ namespace odb
     return r != select_statement::no_data;
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::splits_traits::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::splits_traits::
   delete_ (void*)
   {
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::splits_traits::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::splits_traits::
   load (container_type& c,
         statements_type& sts)
   {
@@ -432,8 +232,8 @@ namespace odb
     container_traits_type::load (c, more, fs);
   }
 
-  access::object_traits_impl< ::opencash::model::Account, id_sqlite >::id_type
-  access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::id_type
+  access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   id (const image_type& i)
   {
     sqlite::database* db (0);
@@ -453,7 +253,7 @@ namespace odb
     return id;
   }
 
-  bool access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  bool access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   grow (image_type& i,
         bool* t)
   {
@@ -470,38 +270,18 @@ namespace odb
       grew = true;
     }
 
-    // _name
+    // _description
     //
     if (t[1UL])
     {
-      i._name_value.capacity (i._name_size);
-      grew = true;
-    }
-
-    // _descr
-    //
-    if (t[2UL])
-    {
-      i._descr_value.capacity (i._descr_size);
-      grew = true;
-    }
-
-    // _type
-    //
-    t[3UL] = false;
-
-    // _parent
-    //
-    if (t[4UL])
-    {
-      i._parent_value.capacity (i._parent_size);
+      i._description_value.capacity (i._description_size);
       grew = true;
     }
 
     return grew;
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   bind (sqlite::bind* b,
         image_type& i,
         sqlite::statement_kind sk)
@@ -526,48 +306,19 @@ namespace odb
       n++;
     }
 
-    // _name
+    // _description
     //
     b[n].type = sqlite::image_traits<
       ::std::string,
       sqlite::id_text>::bind_value;
-    b[n].buffer = i._name_value.data ();
-    b[n].size = &i._name_size;
-    b[n].capacity = i._name_value.capacity ();
-    b[n].is_null = &i._name_null;
-    n++;
-
-    // _descr
-    //
-    b[n].type = sqlite::image_traits<
-      ::std::string,
-      sqlite::id_text>::bind_value;
-    b[n].buffer = i._descr_value.data ();
-    b[n].size = &i._descr_size;
-    b[n].capacity = i._descr_value.capacity ();
-    b[n].is_null = &i._descr_null;
-    n++;
-
-    // _type
-    //
-    b[n].type = sqlite::bind::integer;
-    b[n].buffer = &i._type_value;
-    b[n].is_null = &i._type_null;
-    n++;
-
-    // _parent
-    //
-    b[n].type = sqlite::image_traits<
-      ::std::string,
-      sqlite::id_text>::bind_value;
-    b[n].buffer = i._parent_value.data ();
-    b[n].size = &i._parent_size;
-    b[n].capacity = i._parent_value.capacity ();
-    b[n].is_null = &i._parent_null;
+    b[n].buffer = i._description_value.data ();
+    b[n].size = &i._description_size;
+    b[n].capacity = i._description_value.capacity ();
+    b[n].is_null = &i._description_null;
     n++;
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   bind (sqlite::bind* b, id_image_type& i)
   {
     std::size_t n (0);
@@ -580,7 +331,7 @@ namespace odb
     b[n].is_null = &i.id_null;
   }
 
-  bool access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  bool access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   init (image_type& i,
         const object_type& o,
         sqlite::statement_kind sk)
@@ -613,94 +364,29 @@ namespace odb
       grew = grew || (cap != i._uuid_value.capacity ());
     }
 
-    // _name
+    // _description
     //
     {
       ::std::string const& v =
-        o._name;
+        o._description;
 
       bool is_null (false);
-      std::size_t cap (i._name_value.capacity ());
+      std::size_t cap (i._description_value.capacity ());
       sqlite::value_traits<
           ::std::string,
           sqlite::id_text >::set_image (
-        i._name_value,
-        i._name_size,
+        i._description_value,
+        i._description_size,
         is_null,
         v);
-      i._name_null = is_null;
-      grew = grew || (cap != i._name_value.capacity ());
-    }
-
-    // _descr
-    //
-    {
-      ::std::string const& v =
-        o._descr;
-
-      bool is_null (false);
-      std::size_t cap (i._descr_value.capacity ());
-      sqlite::value_traits<
-          ::std::string,
-          sqlite::id_text >::set_image (
-        i._descr_value,
-        i._descr_size,
-        is_null,
-        v);
-      i._descr_null = is_null;
-      grew = grew || (cap != i._descr_value.capacity ());
-    }
-
-    // _type
-    //
-    {
-      ::opencash::model::Account::AccountType const& v =
-        o._type;
-
-      bool is_null (false);
-      sqlite::value_traits<
-          ::opencash::model::Account::AccountType,
-          sqlite::id_integer >::set_image (
-        i._type_value,
-        is_null,
-        v);
-      i._type_null = is_null;
-    }
-
-    // _parent
-    //
-    {
-      ::opencash::model::Account::AccountPtr const& v =
-        o._parent;
-
-      typedef object_traits< ::opencash::model::Account > obj_traits;
-      typedef odb::pointer_traits< ::opencash::model::Account::AccountPtr > ptr_traits;
-
-      bool is_null (ptr_traits::null_ptr (v));
-      if (!is_null)
-      {
-        const obj_traits::id_type& id (
-          obj_traits::id (ptr_traits::get_ref (v)));
-
-        std::size_t cap (i._parent_value.capacity ());
-        sqlite::value_traits<
-            obj_traits::id_type,
-            sqlite::id_text >::set_image (
-          i._parent_value,
-          i._parent_size,
-          is_null,
-          id);
-        i._parent_null = is_null;
-        grew = grew || (cap != i._parent_value.capacity ());
-      }
-      else
-        i._parent_null = true;
+      i._description_null = is_null;
+      grew = grew || (cap != i._description_value.capacity ());
     }
 
     return grew;
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   init (object_type& o,
         const image_type& i,
         database* db)
@@ -724,96 +410,26 @@ namespace odb
         i._uuid_null);
     }
 
-    // _name
+    // _description
     //
     {
-      // From Account.h:67:18
+      // From Transaction.h:44:18
       ::std::string v;
 
       sqlite::value_traits<
           ::std::string,
           sqlite::id_text >::set_value (
         v,
-        i._name_value,
-        i._name_size,
-        i._name_null);
+        i._description_value,
+        i._description_size,
+        i._description_null);
 
-      // From Account.h:67:18
-      o.setName (v);
-    }
-
-    // _descr
-    //
-    {
-      // From Account.h:70:18
-      ::std::string v;
-
-      sqlite::value_traits<
-          ::std::string,
-          sqlite::id_text >::set_value (
-        v,
-        i._descr_value,
-        i._descr_size,
-        i._descr_null);
-
-      // From Account.h:70:18
-      o.setDescr (v);
-    }
-
-    // _type
-    //
-    {
-      // From Account.h:73:18
-      ::opencash::model::Account::AccountType v;
-
-      sqlite::value_traits<
-          ::opencash::model::Account::AccountType,
-          sqlite::id_integer >::set_value (
-        v,
-        i._type_value,
-        i._type_null);
-
-      // From Account.h:73:18
-      o.setType (v);
-    }
-
-    // _parent
-    //
-    {
-      // From Account.h:76:18
-      ::opencash::model::Account::AccountPtr v;
-
-      typedef object_traits< ::opencash::model::Account > obj_traits;
-      typedef odb::pointer_traits< ::opencash::model::Account::AccountPtr > ptr_traits;
-
-      if (i._parent_null)
-        v = ptr_traits::pointer_type ();
-      else
-      {
-        obj_traits::id_type id;
-        sqlite::value_traits<
-            obj_traits::id_type,
-            sqlite::id_text >::set_value (
-          id,
-          i._parent_value,
-          i._parent_size,
-          i._parent_null);
-
-        // If a compiler error points to the line below, then
-        // it most likely means that a pointer used in a member
-        // cannot be initialized from an object pointer.
-        //
-        v = ptr_traits::pointer_type (
-          static_cast<sqlite::database*> (db)->load<
-            obj_traits::object_type > (id));
-      }
-
-      // From Account.h:76:18
-      o.setParent (v);
+      // From Transaction.h:44:18
+      o.setDescription (v);
     }
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   init (id_image_type& i, const id_type& id)
   {
     bool grew (false);
@@ -835,56 +451,43 @@ namespace odb
       i.version++;
   }
 
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::persist_statement[] =
-  "INSERT INTO \"accounts\" "
+  const char access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::persist_statement[] =
+  "INSERT INTO \"transactions\" "
   "(\"uuid\", "
-  "\"name\", "
-  "\"descr\", "
-  "\"type\", "
-  "\"parent\") "
+  "\"description\") "
   "VALUES "
-  "(?, ?, ?, ?, ?)";
+  "(?, ?)";
 
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::find_statement[] =
+  const char access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::find_statement[] =
   "SELECT "
-  "\"accounts\".\"uuid\", "
-  "\"accounts\".\"name\", "
-  "\"accounts\".\"descr\", "
-  "\"accounts\".\"type\", "
-  "\"accounts\".\"parent\" "
-  "FROM \"accounts\" "
-  "WHERE \"accounts\".\"uuid\"=?";
+  "\"transactions\".\"uuid\", "
+  "\"transactions\".\"description\" "
+  "FROM \"transactions\" "
+  "WHERE \"transactions\".\"uuid\"=?";
 
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::update_statement[] =
-  "UPDATE \"accounts\" "
+  const char access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::update_statement[] =
+  "UPDATE \"transactions\" "
   "SET "
-  "\"name\"=?, "
-  "\"descr\"=?, "
-  "\"type\"=?, "
-  "\"parent\"=? "
+  "\"description\"=? "
   "WHERE \"uuid\"=?";
 
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::erase_statement[] =
-  "DELETE FROM \"accounts\" "
+  const char access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::erase_statement[] =
+  "DELETE FROM \"transactions\" "
   "WHERE \"uuid\"=?";
 
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::query_statement[] =
-  "SELECT\n"
-  "\"accounts\".\"uuid\",\n"
-  "\"accounts\".\"name\",\n"
-  "\"accounts\".\"descr\",\n"
-  "\"accounts\".\"type\",\n"
-  "\"accounts\".\"parent\"\n"
-  "FROM \"accounts\"\n"
-  "LEFT JOIN \"accounts\" AS \"parent\" ON \"parent\".\"uuid\"=\"accounts\".\"parent\"";
+  const char access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::query_statement[] =
+  "SELECT "
+  "\"transactions\".\"uuid\", "
+  "\"transactions\".\"description\" "
+  "FROM \"transactions\"";
 
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::erase_query_statement[] =
-  "DELETE FROM \"accounts\"";
+  const char access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::erase_query_statement[] =
+  "DELETE FROM \"transactions\"";
 
-  const char access::object_traits_impl< ::opencash::model::Account, id_sqlite >::table_name[] =
-  "\"accounts\"";
+  const char access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::table_name[] =
+  "\"transactions\"";
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   persist (database& db, const object_type& obj)
   {
     ODB_POTENTIALLY_UNUSED (db);
@@ -923,7 +526,7 @@ namespace odb
               callback_event::post_persist);
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   update (database& db, const object_type& obj)
   {
     ODB_POTENTIALLY_UNUSED (db);
@@ -984,7 +587,7 @@ namespace odb
     pointer_cache_traits::update (db, obj);
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   erase (database& db, const id_type& id)
   {
     using namespace sqlite;
@@ -1013,8 +616,8 @@ namespace odb
     pointer_cache_traits::erase (db, id);
   }
 
-  access::object_traits_impl< ::opencash::model::Account, id_sqlite >::pointer_type
-  access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::pointer_type
+  access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   find (database& db, const id_type& id)
   {
     using namespace sqlite;
@@ -1069,7 +672,7 @@ namespace odb
     return p;
   }
 
-  bool access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  bool access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   find (database& db, const id_type& id, object_type& obj)
   {
     using namespace sqlite;
@@ -1102,7 +705,7 @@ namespace odb
     return true;
   }
 
-  bool access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  bool access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   reload (database& db, object_type& obj)
   {
     using namespace sqlite;
@@ -1132,7 +735,7 @@ namespace odb
     return true;
   }
 
-  bool access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  bool access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   find_ (statements_type& sts,
          const id_type* id)
   {
@@ -1183,7 +786,7 @@ namespace odb
     return r != select_statement::no_data;
   }
 
-  void access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  void access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   load_ (statements_type& sts,
          object_type& obj,
          bool reload)
@@ -1191,17 +794,6 @@ namespace odb
     ODB_POTENTIALLY_UNUSED (reload);
 
     extra_statement_cache_type& esc (sts.extra_statement_cache ());
-
-    // _children
-    //
-    {
-      ::opencash::model::Account::WeakAccounts& v =
-        obj._children;
-
-      children_traits::load (
-        v,
-        esc._children);
-    }
 
     // _splits
     //
@@ -1215,8 +807,8 @@ namespace odb
     }
   }
 
-  result< access::object_traits_impl< ::opencash::model::Account, id_sqlite >::object_type >
-  access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  result< access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::object_type >
+  access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   query (database&, const query_base_type& q)
   {
     using namespace sqlite;
@@ -1243,7 +835,7 @@ namespace odb
     std::string text (query_statement);
     if (!q.empty ())
     {
-      text += "\n";
+      text += " ";
       text += q.clause ();
     }
 
@@ -1252,7 +844,7 @@ namespace odb
       new (shared) select_statement (
         conn,
         text,
-        true,
+        false,
         true,
         q.parameters_binding (),
         imb));
@@ -1266,7 +858,7 @@ namespace odb
     return result<object_type> (r);
   }
 
-  unsigned long long access::object_traits_impl< ::opencash::model::Account, id_sqlite >::
+  unsigned long long access::object_traits_impl< ::opencash::model::Transaction, id_sqlite >::
   erase_query (database&, const query_base_type& q)
   {
     using namespace sqlite;
@@ -1310,7 +902,7 @@ namespace odb
         }
         case 2:
         {
-          db.execute ("DROP TABLE IF EXISTS \"accounts\"");
+          db.execute ("DROP TABLE IF EXISTS \"transactions\"");
           return false;
         }
       }
@@ -1321,16 +913,9 @@ namespace odb
       {
         case 1:
         {
-          db.execute ("CREATE TABLE \"accounts\" (\n"
+          db.execute ("CREATE TABLE \"transactions\" (\n"
                       "  \"uuid\" TEXT NOT NULL PRIMARY KEY,\n"
-                      "  \"name\" TEXT NOT NULL,\n"
-                      "  \"descr\" TEXT NOT NULL,\n"
-                      "  \"type\" INTEGER NOT NULL,\n"
-                      "  \"parent\" TEXT NULL,\n"
-                      "  CONSTRAINT \"parent_fk\"\n"
-                      "    FOREIGN KEY (\"parent\")\n"
-                      "    REFERENCES \"accounts\" (\"uuid\")\n"
-                      "    DEFERRABLE INITIALLY DEFERRED)");
+                      "  \"description\" TEXT NOT NULL)");
           return false;
         }
       }

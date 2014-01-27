@@ -1,6 +1,7 @@
 #ifndef __OC_MODEL_ACCOUNT_H_
 #define __OC_MODEL_ACCOUNT_H_
 
+#include "opencash/model/definitions.h"
 #include "opencash/model/ObservableModel.h"
 
 #include <Poco/UUID.h>
@@ -10,8 +11,10 @@
 
 namespace opencash { namespace model {
 
+  class Split;
+  IMPORT_ALIAS(Split);
 
-  #pragma db object table("accounts") pointer(std::shared_ptr)
+  #pragma db object session table("accounts") pointer(std::shared_ptr)
   class Account :
     public ::std::enable_shared_from_this<Account>,
     public ObservableModel
@@ -19,10 +22,7 @@ namespace opencash { namespace model {
     friend class odb::access;
 
     public:
-      using AccountPtr = std::shared_ptr<Account>;
-      using AccountWeakPtr = std::weak_ptr<Account>;
-      using Accounts = std::vector<AccountPtr>;
-      using WeakAccounts = std::vector<AccountWeakPtr>;
+      CREATE_ALIAS(Account);
 
       enum class AccountType {
         None,
@@ -36,7 +36,8 @@ namespace opencash { namespace model {
 
     public:
       Account(const std::string & uuid);
-      bool operator==(const Account & rhs) const;
+
+      DECL_COMPARATORS(Account);
 
       std::string getUuid() const;
 
@@ -54,6 +55,9 @@ namespace opencash { namespace model {
 
       const WeakAccounts & getChildren() const;
 
+      void addSplit(SplitPtr split);
+      void removeSplit(SplitPtr split);
+      const Splits& getSplits() const;
     private:
       Account();
 
@@ -74,8 +78,16 @@ namespace opencash { namespace model {
 
       #pragma db value_not_null inverse(_parent)
       WeakAccounts _children;
+
+      #pragma db value_not_null inverse(_account)
+      Splits _splits;
   };
 
-}}
+} }
+
+//odb manual pg. 119
+#ifdef ODB_COMPILER
+#include "opencash/model/Split.h"
+#endif
 
 #endif
