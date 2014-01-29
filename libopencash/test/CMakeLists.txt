@@ -26,6 +26,34 @@ target_link_libraries(TestAccount
 add_test(TestAccount TestAccount)
 
 #
+# Transacation
+#
+
+add_executable(TestTransaction
+  TestTransaction.cpp
+)
+target_link_libraries(TestTransaction
+  ${GTEST_LIBS}
+  ${GMOCK_LIBS}
+  ${OC_LIB_NAME}
+)
+add_test(TestTransaction TestTransaction)
+
+#
+# Split
+#
+
+add_executable(TestSplit
+  TestSplit.cpp
+)
+target_link_libraries(TestSplit
+  ${GTEST_LIBS}
+  ${GMOCK_LIBS}
+  ${OC_LIB_NAME}
+)
+add_test(TestSplit TestSplit)
+
+#
 # DocumentController
 #
 

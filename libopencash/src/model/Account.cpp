@@ -1,18 +1,14 @@
 #include "opencash/model/Account.h"
+#include "opencash/model/Split.h"
 
 namespace opencash { namespace model {
 
-  using AccountType = opencash::model::Account::AccountType;
-  using AccountPtr = opencash::model::Account::AccountPtr;
-  using WeakAccounts = opencash::model::Account::WeakAccounts;
+  IMPORT_ALIAS(Account);
 
   Account::Account(const std::string & uuid) : _uuid(uuid) {}
   Account::Account() {}
 
-  bool Account::operator==(const Account & rhs) const
-  {
-    return (this == &rhs) || (this->_uuid == rhs._uuid);
-  }
+  IMPL_COMPARATORS(Account);
 
   std::string Account::getUuid() const
   {
@@ -43,12 +39,12 @@ namespace opencash { namespace model {
     didChange("descr");
   }
 
-  AccountType Account::getType() const
+  Account::AccountType Account::getType() const
   {
     return _type;
   }
 
-  void Account::setType(AccountType type)
+  void Account::setType(Account::AccountType type)
   {
     willChange("type");
     _type = type;
@@ -104,4 +100,36 @@ namespace opencash { namespace model {
     return _children;
   }
 
+  void Account::addSplit(SplitPtr split) {
+    auto it = std::find(_splits.begin(), _splits.end(), split);
+
+    if(it == _splits.end()) {
+      size_t index = _splits.size();
+
+      willChangeAtIndex("splits", index, ChangeType::Insertion);
+      _splits.push_back(split);
+      didChangeAtIndex("splits", index, ChangeType::Insertion);
+
+      split->setAccount(shared_from_this());
+    }
+  }
+
+  void Account::removeSplit(SplitPtr split) {
+    auto it = std::find(_splits.begin(), _splits.end(), split);
+
+    if(it != _splits.end()) {
+      size_t index = std::distance(_splits.begin(), it);
+
+      willChangeAtIndex("splits", index, ChangeType::Removal);
+      _splits.erase(it);
+      didChangeAtIndex("splits", index, ChangeType::Removal);
+
+      if(split)
+        split->setAccount(AccountPtr());
+    }
+  }
+
+  const Splits& Account::getSplits() const {
+    return _splits;
+  }
 }}

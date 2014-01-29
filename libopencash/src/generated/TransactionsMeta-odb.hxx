@@ -2,8 +2,8 @@
 // compiler for C++.
 //
 
-#ifndef ACCOUNTS_META_ODB_HXX
-#define ACCOUNTS_META_ODB_HXX
+#ifndef TRANSACTIONS_META_ODB_HXX
+#define TRANSACTIONS_META_ODB_HXX
 
 #include <odb/version.hxx>
 
@@ -13,7 +13,7 @@
 
 #include <odb/pre.hxx>
 
-#include <opencash/model/AccountsMeta.h>
+#include <opencash/model/TransactionsMeta.h>
 
 #include "generated/Account-odb.hxx"
 #include "generated/Split-odb.hxx"
@@ -38,20 +38,20 @@
 
 namespace odb
 {
-  // AccountsMeta
+  // TransactionsMeta
   //
   template <>
-  struct class_traits< ::opencash::model::AccountsMeta >
+  struct class_traits< ::opencash::model::TransactionsMeta >
   {
     static const class_kind kind = class_view;
   };
 
   template <>
-  class access::view_traits< ::opencash::model::AccountsMeta >
+  class access::view_traits< ::opencash::model::TransactionsMeta >
   {
     public:
-    typedef ::opencash::model::AccountsMeta view_type;
-    typedef ::opencash::model::AccountsMeta* pointer_type;
+    typedef ::opencash::model::TransactionsMeta view_type;
+    typedef ::opencash::model::TransactionsMeta* pointer_type;
 
     static void
     callback (database&, view_type&, callback_event);
@@ -68,11 +68,11 @@ namespace odb
 
 namespace odb
 {
-  // AccountsMeta
+  // TransactionsMeta
   //
   template <>
-  class access::view_traits_impl< ::opencash::model::AccountsMeta, id_sqlite >:
-    public access::view_traits< ::opencash::model::AccountsMeta >
+  class access::view_traits_impl< ::opencash::model::TransactionsMeta, id_sqlite >:
+    public access::view_traits< ::opencash::model::TransactionsMeta >
   {
     public:
     struct image_type
@@ -115,24 +115,24 @@ namespace odb
   };
 
   template <>
-  class access::view_traits_impl< ::opencash::model::AccountsMeta, id_common >:
-    public access::view_traits_impl< ::opencash::model::AccountsMeta, id_sqlite >
+  class access::view_traits_impl< ::opencash::model::TransactionsMeta, id_common >:
+    public access::view_traits_impl< ::opencash::model::TransactionsMeta, id_sqlite >
   {
   };
 
-  // AccountsMeta
+  // TransactionsMeta
   //
-  struct access::view_traits_impl< ::opencash::model::AccountsMeta, id_sqlite >::query_columns:
+  struct access::view_traits_impl< ::opencash::model::TransactionsMeta, id_sqlite >::query_columns:
     odb::pointer_query_columns<
-      ::opencash::model::Account,
+      ::opencash::model::Transaction,
       id_sqlite,
-      odb::access::object_traits_impl< ::opencash::model::Account, id_sqlite > >
+      odb::access::object_traits_impl< ::opencash::model::Transaction, id_sqlite > >
   {
   };
 }
 
-#include <generated/AccountsMeta-odb.ixx>
+#include <generated/TransactionsMeta-odb.ixx>
 
 #include <odb/post.hxx>
 
-#endif // ACCOUNTS_META_ODB_HXX
+#endif // TRANSACTIONS_META_ODB_HXX
