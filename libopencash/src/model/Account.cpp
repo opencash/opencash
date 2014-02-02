@@ -76,9 +76,9 @@ namespace opencash { namespace model {
 	  }
   }
 
-  void Account::removeParent()
+  void Account::unsetParent()
   {
-	  this->setParent(NULL);
+	this->setParent(NULL);
   }
 
   void Account::registerWithParent(AccountPtr parent)

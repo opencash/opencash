@@ -50,7 +50,7 @@ TEST(TestAccount, shouldAllowMultipleChildren) {
   ASSERT_EQ(2, parentAcc->getChildren().size());
 }
 
-TEST(TestAccount, shouldRemoveChildFromParentWhenChildRemovesParent) {
+TEST(TestAccount, shouldRemoveChildFromParentWhenUnsettingParent) {
   // given
   AccountPtr parentAcc(new Account(A_UUID));
   parentAcc->setName("parent");
@@ -64,7 +64,7 @@ TEST(TestAccount, shouldRemoveChildFromParentWhenChildRemovesParent) {
   // when
   childAcc1->setParent(parentAcc);
   childAcc2->setParent(parentAcc);
-  childAcc1->removeParent();
+  childAcc1->unsetParent();
 
   // then
   ASSERT_EQ(childAcc2, parentAcc->getChildren().at(0).lock());

@@ -53,7 +53,7 @@ namespace opencash { namespace model {
       AccountPtr getParent() const;
       void setParent(AccountPtr parent);
 
-	  void removeParent();
+	  void unsetParent();
 
       const WeakAccounts & getChildren() const;
 
