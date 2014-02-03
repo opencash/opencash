@@ -139,6 +139,23 @@ TEST(TestAccount, shouldNotTriggerParentChangedWhenSettingToSameParent) {
   // mock expectations implicitly verified
 }
 
+TEST(TestAccount, shouldNotTriggerParentChangedWhenUnsettingParentIfAccountHasNoParent) {
+  AccountPtr accountWithoutParent(new Account(A_UUID));
+  MockModelObserver accountObserver(*accountWithoutParent);
+
+  EXPECT_CALL(accountObserver, willChange("parent"))
+		.Times(0);
+  EXPECT_CALL(accountObserver, didChange("parent"))
+		.Times(0);
+
+  //when
+  accountWithoutParent->unsetParent();
+
+  //then
+  // mock expectations implicitly verified
+}
+	
+
 TEST(TestAccount, shouldTriggerMemberObserverEvents) {
   // given
   Account acc(A_UUID);
@@ -207,8 +224,8 @@ TEST(TestAccount, shouldTriggerParentChildrenObserverEvents) {
   // when
   childAcc1->setParent(parentAcc);
   childAcc2->setParent(parentAcc);
-  childAcc2->setParent(NULL);
-  childAcc1->setParent(NULL);
+  childAcc2->unsetParent();
+  childAcc1->unsetParent();
 
   // then
   // mock expectations implicitly verified
