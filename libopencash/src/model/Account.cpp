@@ -78,7 +78,13 @@ namespace opencash { namespace model {
 
   void Account::unsetParent()
   {
-	this->setParent(NULL);
+	if (!_parent) { return; }
+
+	willChange("parent");
+
+	unregisterFromCurrentParent();
+
+	didChange("parent");
   }
 
   void Account::registerWithParent(AccountPtr parent)
@@ -98,8 +104,6 @@ namespace opencash { namespace model {
   void Account::setParent(AccountPtr parent)
   {
 	  if (parent == _parent) { return; }
-
-	  using ChangeType = opencash::model::ObservableModel::ChangeType;
 
 	  willChange("parent");
 
