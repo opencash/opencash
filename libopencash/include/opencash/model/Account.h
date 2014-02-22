@@ -53,6 +53,8 @@ namespace opencash { namespace model {
       AccountPtr getParent() const;
       void setParent(AccountPtr parent);
 
+	  void unsetParent();
+
       const WeakAccounts & getChildren() const;
 
       void addSplit(SplitPtr split);
@@ -60,6 +62,8 @@ namespace opencash { namespace model {
       const Splits& getSplits() const;
     private:
       Account();
+	  void unregisterFromCurrentParent();
+	  void registerWithParent(AccountPtr parent);
 
       #pragma db id
       std::string _uuid;

@@ -56,43 +56,61 @@ namespace opencash { namespace model {
     return _parent;
   }
 
+  void Account::unregisterFromCurrentParent()
+  {
+	  if (_parent) {
+		  auto index = std::numeric_limits<std::size_t>::max();
+
+		  WeakAccounts & children = _parent->_children;
+		  auto child = std::find_if(children.begin(), children.end(),
+				  [this](AccountWeakPtr item) {
+				  return (item.lock().get() == this);
+				  });
+		  if (child != children.end()) {
+			  index = distance(children.begin(), child);
+
+			  _parent->willChangeAtIndex("children", index, ChangeType::Removal);
+			  children.erase(child);
+			  _parent->didChangeAtIndex("children", index, ChangeType::Removal);
+		  }
+	  }
+  }
+
+  void Account::unsetParent()
+  {
+	if (!_parent) { return; }
+
+	willChange("parent");
+
+	unregisterFromCurrentParent();
+
+	didChange("parent");
+  }
+
+  void Account::registerWithParent(AccountPtr parent)
+  {
+	  if (parent)
+	  {
+		  auto index = parent->_children.size();
+
+		  parent->willChangeAtIndex("children", index, ChangeType::Insertion);
+		  parent->_children.push_back(shared_from_this());
+		  parent->didChangeAtIndex("children", index, ChangeType::Insertion);
+	  }
+
+	  _parent = parent;
+  }
+
   void Account::setParent(AccountPtr parent)
   {
-    if (parent == _parent) { return; }
+	  if (parent == _parent) { return; }
 
-    using ChangeType = opencash::model::ObservableModel::ChangeType;
+	  willChange("parent");
 
-    willChange("parent");
+	  unregisterFromCurrentParent();
+	  registerWithParent(parent);
 
-    // unregister from previous parent
-    if (_parent) {
-      auto index = std::numeric_limits<std::size_t>::max();
-
-      WeakAccounts & children = _parent->_children;
-      auto child = std::find_if(children.begin(), children.end(),
-          [this](AccountWeakPtr item) {
-            return (item.lock().get() == this);
-          });
-      if (child != children.end()) {
-        index = distance(children.begin(), child);
-
-        _parent->willChangeAtIndex("children", index, ChangeType::Removal);
-        children.erase(child);
-        _parent->didChangeAtIndex("children", index, ChangeType::Removal);
-      }
-    }
-
-    // register with new parent
-    if (parent) {
-      auto index = parent->_children.size();
-
-      parent->willChangeAtIndex("children", index, ChangeType::Insertion);
-      parent->_children.push_back(shared_from_this());
-      parent->didChangeAtIndex("children", index, ChangeType::Insertion);
-    }
-
-    _parent = parent;
-    didChange("parent");
+	  didChange("parent");
   }
 
   const WeakAccounts & Account::getChildren() const
