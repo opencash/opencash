@@ -45,4 +45,16 @@ This project uses [`git subtree`](https://github.com/git/git/blob/master/contrib
 | `opencash-ios` | https://github.com/opencash/opencash-ios.git |
 | `opencash-xcode` | https://github.com/opencash/opencash-xcode.git |
 
+How to use `git subtree` on the example of `libopencash`:
+
+```
+git remote add -f libopencash https://github.com/opencash/libopencash.git
+git subtree push -P libopencash libopencash master
+git subtree pull -P libopencash libopencash
+
+# to push all external repos
+for p in libopencash opencash-android opencash-cocoa opencash-ios opencash-osx opencash-xcode; do git subtree push -P $p $p master; done
+```
+
+
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/opencash/opencash/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
