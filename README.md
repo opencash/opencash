@@ -40,20 +40,22 @@ This project uses [`git subtree`](https://github.com/git/git/blob/master/contrib
 |---------------|--------|
 | `libopencash` | https://github.com/opencash/libopencash.git |
 | `opencash-android` | https://github.com/opencash/opencash-android.git |
+| `opencash-cli` | https://github.com/opencash/opencash-cli.git |
 | `opencash-cocoa` | https://github.com/opencash/opencash-cocoa.git |
 | `opencash-osx` | https://github.com/opencash/opencash-osx.git |
 | `opencash-ios` | https://github.com/opencash/opencash-ios.git |
 | `opencash-xcode` | https://github.com/opencash/opencash-xcode.git |
 
-How to use `git subtree` on the example of `libopencash`:
+How to use `git subtree` on the example of `opencash-cli`:
 
 ```
-git remote add -f libopencash https://github.com/opencash/libopencash.git
-git subtree push -P libopencash libopencash master
-git subtree pull -P libopencash libopencash
+git remote add -f opencash-cli https://github.com/opencash/opencash-cli.git
+git subtree add --prefix opencash-cli opencash-cli master
+git subtree push -P opencash-cli opencash-cli master
+git subtree pull -P opencash-cli opencash-cli
 
 # to push all external repos
-for p in libopencash opencash-android opencash-cocoa opencash-ios opencash-osx opencash-xcode; do git subtree push -P $p $p master; done
+for p in libopencash opencash-android opencash-cli opencash-cocoa opencash-ios opencash-osx opencash-xcode; do git subtree push -P $p $p master; done
 ```
 
 
