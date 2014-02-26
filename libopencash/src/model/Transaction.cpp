@@ -5,14 +5,7 @@ namespace opencash { namespace model {
 
   IMPORT_ALIAS(Transaction);
 
-  Transaction::Transaction(const std::string& uuid) : _uuid(uuid) {}
-  Transaction::Transaction() {}
-
   IMPL_COMPARATORS(Transaction);
-
-  std::string Transaction::getUuid() const {
-  	return _uuid;
-  }
 
   std::string Transaction::getDescription() const {
   	return _description;

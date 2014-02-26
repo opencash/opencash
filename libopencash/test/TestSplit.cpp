@@ -12,15 +12,11 @@ IMPORT_ALIAS(Account);
 
 using namespace testing;
 
-const std::string UUID1 = "uuid 1";
-const std::string UUID2 = "uuid 2";
-const std::string UUID3 = "uuid 3";
-
 TEST(TestSplit, shouldTriggerMemberObserverEvents) {
   // given
-  SplitPtr split(new Split(UUID1));
-  TransactionPtr transaction(new Transaction(UUID2));
-  AccountPtr account(new Account(UUID3));
+  SplitPtr split(new Split());
+  TransactionPtr transaction(new Transaction());
+  AccountPtr account(new Account());
   MockModelObserver obs(*split);
 
   {
@@ -55,8 +51,8 @@ TEST(TestSplit, shouldTriggerMemberObserverEvents) {
 
 TEST(TestSplit, shouldAddSplitIntoTransaction) {
   // given
-  SplitPtr split(new Split(UUID1));
-  TransactionPtr transaction(new Transaction(UUID2));
+  SplitPtr split(new Split());
+  TransactionPtr transaction(new Transaction());
 
   // when
   split->setTransaction(transaction);
@@ -67,8 +63,8 @@ TEST(TestSplit, shouldAddSplitIntoTransaction) {
 
 TEST(TestSplit, shouldRemoveSplitFromTransactionWhenChagingToNull) {
   // given
-  SplitPtr split(new Split(UUID1));
-  TransactionPtr transaction(new Transaction(UUID2));
+  SplitPtr split(new Split());
+  TransactionPtr transaction(new Transaction());
   split->setTransaction(transaction);
 
   // when
@@ -80,9 +76,9 @@ TEST(TestSplit, shouldRemoveSplitFromTransactionWhenChagingToNull) {
 
 TEST(TestSplit, shouldRemoveSplitFromTransactionAndInsertIntoAnotherTransaction) {
   // given
-  SplitPtr split(new Split(UUID1));
-  TransactionPtr tx1(new Transaction(UUID2));
-  TransactionPtr tx2(new Transaction(UUID3));
+  SplitPtr split(new Split());
+  TransactionPtr tx1(new Transaction());
+  TransactionPtr tx2(new Transaction());
   split->setTransaction(tx1);
 
   // when
@@ -95,8 +91,8 @@ TEST(TestSplit, shouldRemoveSplitFromTransactionAndInsertIntoAnotherTransaction)
 
 TEST(TestSplit, shouldAddSplitIntoAccount) {
   // given
-  SplitPtr split(new Split(UUID1));
-  AccountPtr account(new Account(UUID2));
+  SplitPtr split(new Split());
+  AccountPtr account(new Account());
 
   // when
   split->setAccount(account);
@@ -107,8 +103,8 @@ TEST(TestSplit, shouldAddSplitIntoAccount) {
 
 TEST(TestSplit, shouldRemoveSplitFromAccountWhenChagingToNull) {
   // given
-  SplitPtr split(new Split(UUID1));
-  AccountPtr account(new Account(UUID2));
+  SplitPtr split(new Split());
+  AccountPtr account(new Account());
   split->setAccount(account);
 
   // when
@@ -120,9 +116,9 @@ TEST(TestSplit, shouldRemoveSplitFromAccountWhenChagingToNull) {
 
 TEST(TestSplit, shouldRemoveSplitFromAccountAndInsertIntoAnotherAccount) {
   // given
-  SplitPtr split(new Split(UUID1));
-  AccountPtr acc1(new Account(UUID2));
-  AccountPtr acc2(new Account(UUID3));
+  SplitPtr split(new Split());
+  AccountPtr acc1(new Account());
+  AccountPtr acc2(new Account());
   split->setAccount(acc1);
 
   // when

@@ -10,34 +10,11 @@ IMPORT_ALIAS(Split);
 
 using namespace testing;
 
-const std::string UUID1 = "uuid 1";
-const std::string UUID2 = "uuid 2";
-const std::string UUID3 = "uuid 3";
-
-TEST(TestTransaction, shouldCompareEqualityBasedOnlyOnUuid) {
-  //given
-  Transaction tx1(UUID1);
-  tx1.setDescription("transaction one");
-
-  Transaction tx2(UUID1);
-  tx2.setDescription("transaction two");
-
-  Transaction tx3(UUID2);
-  tx3.setDescription("transaction three");
-
-  //when
-
-  //then
-  ASSERT_EQ(tx1, tx2);
-  ASSERT_NE(tx1, tx3);
-  ASSERT_NE(tx2, tx3);
-}
-
 TEST(TestTransaction, shouldAddSplitIntoTransaction) {
   //given
-  TransactionPtr transaction(new Transaction(UUID1));
-  SplitPtr split1(new Split(UUID2));
-  SplitPtr split2(new Split(UUID3));
+  TransactionPtr transaction(new Transaction());
+  SplitPtr split1(new Split());
+  SplitPtr split2(new Split());
 
   //when
   transaction->addSplit(split1);
@@ -52,9 +29,9 @@ TEST(TestTransaction, shouldAddSplitIntoTransaction) {
 
 TEST(TestTransaction, shouldRemoveSplitFromTransaction) {
   //given
-  TransactionPtr transaction(new Transaction(UUID1));
-  SplitPtr split1(new Split(UUID2));
-  SplitPtr split2(new Split(UUID3));
+  TransactionPtr transaction(new Transaction());
+  SplitPtr split1(new Split());
+  SplitPtr split2(new Split());
   transaction->addSplit(split1);
   transaction->addSplit(split2);
 
@@ -70,8 +47,8 @@ TEST(TestTransaction, shouldRemoveSplitFromTransaction) {
 
 TEST(TestTransaction, shouldSetTransactionInSplitWhenAddingSplit) {
   //given
-  TransactionPtr transaction(new Transaction(UUID1));
-  SplitPtr split1(new Split(UUID2));
+  TransactionPtr transaction(new Transaction());
+  SplitPtr split1(new Split());
 
   //when
   transaction->addSplit(split1);
@@ -82,9 +59,9 @@ TEST(TestTransaction, shouldSetTransactionInSplitWhenAddingSplit) {
 
 TEST(TestTransaction, shouldTriggerMemberObserverEvents) {
   // given
-  TransactionPtr transaction(new Transaction(UUID1));
-  SplitPtr split1(new Split(UUID2));
-  SplitPtr split2(new Split(UUID3));
+  TransactionPtr transaction(new Transaction());
+  SplitPtr split1(new Split());
+  SplitPtr split2(new Split());
   MockModelObserver obs(*transaction);
 
   {

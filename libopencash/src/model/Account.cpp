@@ -5,15 +5,7 @@ namespace opencash { namespace model {
 
   IMPORT_ALIAS(Account);
 
-  Account::Account(const std::string & uuid) : _uuid(uuid) {}
-  Account::Account() {}
-
   IMPL_COMPARATORS(Account);
-
-  std::string Account::getUuid() const
-  {
-    return _uuid;
-  }
 
   std::string Account::getName() const
   {

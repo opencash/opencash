@@ -16,6 +16,7 @@
 #include <opencash/model/AccountsMeta.h>
 
 #include "generated/Account-odb.hxx"
+#include "generated/ManagedObject-odb.hxx"
 #include "generated/Split-odb.hxx"
 #include "generated/Transaction-odb.hxx"
 

@@ -1,4 +1,5 @@
 #include "opencash/controller/DocumentController.h"
+#include "opencash/controller/ManagedObjectContext.h"
 #include "opencash/model/Account.h"
 #include "opencash/model/Split.h"
 #include "opencash/model/Transaction.h"
@@ -10,6 +11,7 @@
 #include <gmock/gmock.h>
 
 using DocumentController = opencash::controller::DocumentController;
+using ManagedObjectContext = opencash::controller::ManagedObjectContext;
 using AccountsMeta = opencash::model::AccountsMeta;
 
 IMPORT_ALIAS(Account);
@@ -24,6 +26,7 @@ const std::string DBFILENAME = ":memory:";
 class TestDocumentController : public ::testing::Test {
   protected:
     std::unique_ptr<DocumentController> _doc;
+    ManagedObjectContext _moc;
 
     TestDocumentController()
       : _doc(new DocumentController(DBFILENAME, true))
@@ -31,7 +34,7 @@ class TestDocumentController : public ::testing::Test {
 
     AccountPtr createAnAssetAccount()
     {
-      AccountPtr ret = _doc->newAccount();
+      AccountPtr ret = _moc.createAccount();
       ret->setName("test account");
       ret->setDescr("This is my first asset account");
       ret->setType(Account::AccountType::Asset);
@@ -39,7 +42,7 @@ class TestDocumentController : public ::testing::Test {
     }
 
     SplitPtr createSplit() {
-      return _doc->newSplit();
+      return _moc.createSplit();
     }
 
     TransactionPtr createTransaction() {
@@ -88,8 +91,8 @@ TEST_F(TestDocumentController, shouldRetrieveAccounts) {
 
   // then
   ASSERT_EQ(3, accounts.size());
-  ASSERT_EQ(*acc, *(accounts.at(1)));
-  ASSERT_EQ(*acc2, *(accounts.at(2)));
+  ASSERT_STREQ(acc->getUuid().c_str(), accounts.at(1)->getUuid().c_str());
+  ASSERT_STREQ(acc2->getUuid().c_str(), accounts.at(2)->getUuid().c_str());
 }
 
 TEST_F(TestDocumentController, shouldUpdateAccountsMetaAndFireEvents) {

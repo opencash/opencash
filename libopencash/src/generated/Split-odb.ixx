@@ -12,7 +12,7 @@ namespace odb
   access::object_traits< ::opencash::model::Split >::
   id (const object_type& o)
   {
-    return o._uuid;
+    return object_traits< ::opencash::model::ManagedObject >::id (o);
   }
 
   inline
@@ -38,6 +38,28 @@ namespace odb
 {
   // Split
   //
+
+  inline
+  access::object_traits_impl< ::opencash::model::Split, id_sqlite >::id_type
+  access::object_traits_impl< ::opencash::model::Split, id_sqlite >::
+  id (const image_type& i)
+  {
+    return object_traits_impl< ::opencash::model::ManagedObject, id_sqlite >::id (i);
+  }
+
+  inline
+  void access::object_traits_impl< ::opencash::model::Split, id_sqlite >::
+  bind (sqlite::bind* b, id_image_type& i)
+  {
+    object_traits_impl< ::opencash::model::ManagedObject, id_sqlite >::bind (b, i);
+  }
+
+  inline
+  void access::object_traits_impl< ::opencash::model::Split, id_sqlite >::
+  init (id_image_type& i, const id_type& id)
+  {
+    object_traits_impl< ::opencash::model::ManagedObject, id_sqlite >::init (i, id);
+  }
 
   inline
   void access::object_traits_impl< ::opencash::model::Split, id_sqlite >::

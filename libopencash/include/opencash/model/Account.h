@@ -2,9 +2,8 @@
 #define __OC_MODEL_ACCOUNT_H_
 
 #include "opencash/model/definitions.h"
-#include "opencash/model/ObservableModel.h"
+#include "opencash/model/ManagedObject.h"
 
-#include <Poco/UUID.h>
 #include <odb/core.hxx>
 #include <string>
 #include <memory>
@@ -17,7 +16,7 @@ namespace opencash { namespace model {
   #pragma db object session table("accounts") pointer(std::shared_ptr)
   class Account :
     public ::std::enable_shared_from_this<Account>,
-    public ObservableModel
+    public ManagedObject
   {
     friend class odb::access;
 
@@ -35,11 +34,7 @@ namespace opencash { namespace model {
       };
 
     public:
-      Account(const std::string & uuid);
-
       DECL_COMPARATORS(Account);
-
-      std::string getUuid() const;
 
       std::string getName() const;
       void setName(std::string name);
@@ -53,20 +48,17 @@ namespace opencash { namespace model {
       AccountPtr getParent() const;
       void setParent(AccountPtr parent);
 
-	  void unsetParent();
+      void unsetParent();
 
       const WeakAccounts & getChildren() const;
 
       void addSplit(SplitPtr split);
       void removeSplit(SplitPtr split);
       const Splits& getSplits() const;
-    private:
-      Account();
-	  void unregisterFromCurrentParent();
-	  void registerWithParent(AccountPtr parent);
 
-      #pragma db id
-      std::string _uuid;
+    private:
+      void unregisterFromCurrentParent();
+      void registerWithParent(AccountPtr parent);
 
       #pragma db set(setName)
       std::string _name;
