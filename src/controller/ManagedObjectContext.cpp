@@ -9,19 +9,32 @@ namespace opencash { namespace controller {
 
   IMPORT_ALIAS(Account);
   IMPORT_ALIAS(Split);
+  using Uuid = ManagedObjectContext::Uuid;
 
-  using Uuid = model::ManagedObject::Uuid;
+  // public
 
-  AccountPtr ManagedObjectContext::createAccount() const {
+  AccountPtr ManagedObjectContext::createAccount() {
     AccountPtr account(new Account);
-    account->setUuid(generateUuid());
+    assignUuid(*account);
     return account;
   }
 
-  SplitPtr ManagedObjectContext::createSplit() const {
+  SplitPtr ManagedObjectContext::createSplit() {
     SplitPtr split(new Split);
-    split->setUuid(generateUuid());
+    assignUuid(*split);
     return split;
+  }
+
+  bool ManagedObjectContext::hasUuid(const Uuid & uuid) const {
+    return _uuids.find(uuid) != _uuids.end();
+  }
+
+  // protected
+
+  void ManagedObjectContext::assignUuid(ManagedObject & mobj) {
+    Uuid uuid(generateUuid());
+    mobj.setUuid(uuid);
+    _uuids.insert(uuid);
   }
 
   Uuid ManagedObjectContext::generateUuid() const {
