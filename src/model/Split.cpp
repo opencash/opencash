@@ -4,14 +4,7 @@ namespace opencash { namespace model {
 
   IMPORT_ALIAS(Split);
 
-  Split::Split(const std::string& uuid) : _uuid(uuid) {}
-  Split::Split() {}
-
   IMPL_COMPARATORS(Split);
-
-  std::string Split::getUuid() const {
-    return _uuid;
-  }
 
   TransactionWeakPtr Split::getTransaction() const {
     return _transaction;

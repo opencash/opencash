@@ -2,7 +2,7 @@
 #define __OC_MODEL_TRANSACTION_H_
 
 #include "opencash/model/definitions.h"
-#include "opencash/model/ObservableModel.h"
+#include "opencash/model/ManagedObject.h"
 
 #include <Poco/UUID.h>
 #include <odb/core.hxx>
@@ -17,17 +17,14 @@ namespace opencash { namespace model {
   #pragma db object session table("transactions") pointer(std::shared_ptr)
   class Transaction :
     public ::std::enable_shared_from_this<Transaction>,
-    public ObservableModel {
+    public ManagedObject
+  {
     friend class odb::access;
 
     public:
       CREATE_ALIAS(Transaction);
 
-      Transaction(const std::string& uuid);
-
       DECL_COMPARATORS(Transaction);
-
-      std::string getUuid() const;
 
       std::string getDescription() const;
       void setDescription(const std::string& description);
@@ -35,12 +32,8 @@ namespace opencash { namespace model {
       void addSplit(SplitPtr split);
       void removeSplit(SplitPtr split);
       const Splits& getSplits() const;
-    private:
-      Transaction();
-      
-      #pragma db id
-      std::string _uuid;
 
+    private:
       #pragma db set(setDescription)
       std::string _description;
 

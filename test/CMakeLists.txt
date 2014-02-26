@@ -54,6 +54,20 @@ target_link_libraries(TestSplit
 add_test(TestSplit TestSplit)
 
 #
+# ManagedObjectContext
+#
+
+add_executable(TestManagedObjectContext
+  TestManagedObjectContext.cpp
+)
+target_link_libraries(TestManagedObjectContext
+  ${GTEST_LIBS}
+  ${GMOCK_LIBS}
+  ${OC_LIB_NAME}
+)
+add_test(TestManagedObjectContext TestManagedObjectContext)
+
+#
 # DocumentController
 #
 

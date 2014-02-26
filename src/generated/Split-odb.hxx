@@ -16,6 +16,7 @@
 #include <opencash/model/Split.h>
 
 #include "generated/Account-odb.hxx"
+#include "generated/ManagedObject-odb.hxx"
 #include "generated/Transaction-odb.hxx"
 
 #include <memory>
@@ -55,9 +56,9 @@ namespace odb
 
     static const bool polymorphic = false;
 
-    typedef ::std::string id_type;
+    typedef object_traits< ::opencash::model::ManagedObject >::id_type id_type;
 
-    static const bool auto_id = false;
+    static const bool auto_id = object_traits< ::opencash::model::ManagedObject >::auto_id;
 
     static const bool abstract = false;
 
@@ -97,26 +98,19 @@ namespace odb
   // Split
   //
   template <typename A>
-  struct pointer_query_columns< ::opencash::model::Split, id_sqlite, A >
+  struct pointer_query_columns< ::opencash::model::Split, id_sqlite, A >:
+    pointer_query_columns< ::opencash::model::ManagedObject, id_sqlite, A >
   {
-    // uuid
+    // ManagedObject
     //
-    typedef
-    sqlite::query_column<
-      sqlite::value_traits<
-        ::std::string,
-        sqlite::id_text >::query_type,
-      sqlite::id_text >
-    uuid_type_;
-
-    static const uuid_type_ uuid;
+    typedef pointer_query_columns< ::opencash::model::ManagedObject, id_sqlite, A > ManagedObject;
 
     // transaction
     //
     typedef
     sqlite::query_column<
       sqlite::value_traits<
-        ::std::string,
+        ::opencash::model::ManagedObject::Uuid,
         sqlite::id_text >::query_type,
       sqlite::id_text >
     transaction_type_;
@@ -128,7 +122,7 @@ namespace odb
     typedef
     sqlite::query_column<
       sqlite::value_traits<
-        ::std::string,
+        ::opencash::model::ManagedObject::Uuid,
         sqlite::id_text >::query_type,
       sqlite::id_text >
     account_type_;
@@ -173,11 +167,6 @@ namespace odb
   };
 
   template <typename A>
-  const typename pointer_query_columns< ::opencash::model::Split, id_sqlite, A >::uuid_type_
-  pointer_query_columns< ::opencash::model::Split, id_sqlite, A >::
-  uuid (A::table_name, "\"uuid\"", 0);
-
-  template <typename A>
   const typename pointer_query_columns< ::opencash::model::Split, id_sqlite, A >::transaction_type_
   pointer_query_columns< ::opencash::model::Split, id_sqlite, A >::
   transaction (A::table_name, "\"transaction\"", 0);
@@ -207,23 +196,10 @@ namespace odb
     public access::object_traits< ::opencash::model::Split >
   {
     public:
-    struct id_image_type
+    typedef object_traits_impl< ::opencash::model::ManagedObject, id_sqlite >::id_image_type id_image_type;
+
+    struct image_type: object_traits_impl< ::opencash::model::ManagedObject, id_sqlite >::image_type
     {
-      details::buffer id_value;
-      std::size_t id_size;
-      bool id_null;
-
-      std::size_t version;
-    };
-
-    struct image_type
-    {
-      // _uuid
-      //
-      details::buffer _uuid_value;
-      std::size_t _uuid_size;
-      bool _uuid_null;
-
       // _transaction
       //
       details::buffer _transaction_value;
@@ -403,26 +379,19 @@ namespace odb
 
   template <typename A>
   struct query_columns< ::opencash::model::Split, id_sqlite, A >:
-    query_columns_base< ::opencash::model::Split, id_sqlite >
+    query_columns_base< ::opencash::model::Split, id_sqlite >,
+    query_columns< ::opencash::model::ManagedObject, id_sqlite, A >
   {
-    // uuid
+    // ManagedObject
     //
-    typedef
-    sqlite::query_column<
-      sqlite::value_traits<
-        ::std::string,
-        sqlite::id_text >::query_type,
-      sqlite::id_text >
-    uuid_type_;
-
-    static const uuid_type_ uuid;
+    typedef query_columns< ::opencash::model::ManagedObject, id_sqlite, A > ManagedObject;
 
     // transaction
     //
     typedef
     sqlite::query_column<
       sqlite::value_traits<
-        ::std::string,
+        ::opencash::model::ManagedObject::Uuid,
         sqlite::id_text >::query_type,
       sqlite::id_text >
     transaction_column_type_;
@@ -450,7 +419,7 @@ namespace odb
     typedef
     sqlite::query_column<
       sqlite::value_traits<
-        ::std::string,
+        ::opencash::model::ManagedObject::Uuid,
         sqlite::id_text >::query_type,
       sqlite::id_text >
     account_column_type_;
@@ -509,11 +478,6 @@ namespace odb
 
     static const value_type_ value;
   };
-
-  template <typename A>
-  const typename query_columns< ::opencash::model::Split, id_sqlite, A >::uuid_type_
-  query_columns< ::opencash::model::Split, id_sqlite, A >::
-  uuid (A::table_name, "\"uuid\"", 0);
 
   template <typename A>
   const typename query_columns< ::opencash::model::Split, id_sqlite, A >::transaction_type_

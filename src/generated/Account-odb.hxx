@@ -15,6 +15,8 @@
 
 #include <opencash/model/Account.h>
 
+#include "generated/ManagedObject-odb.hxx"
+
 #include <memory>
 #include <cstddef>
 
@@ -52,9 +54,9 @@ namespace odb
 
     static const bool polymorphic = false;
 
-    typedef ::std::string id_type;
+    typedef object_traits< ::opencash::model::ManagedObject >::id_type id_type;
 
-    static const bool auto_id = false;
+    static const bool auto_id = object_traits< ::opencash::model::ManagedObject >::auto_id;
 
     static const bool abstract = false;
 
@@ -94,19 +96,12 @@ namespace odb
   // Account
   //
   template <typename A>
-  struct pointer_query_columns< ::opencash::model::Account, id_sqlite, A >
+  struct pointer_query_columns< ::opencash::model::Account, id_sqlite, A >:
+    pointer_query_columns< ::opencash::model::ManagedObject, id_sqlite, A >
   {
-    // uuid
+    // ManagedObject
     //
-    typedef
-    sqlite::query_column<
-      sqlite::value_traits<
-        ::std::string,
-        sqlite::id_text >::query_type,
-      sqlite::id_text >
-    uuid_type_;
-
-    static const uuid_type_ uuid;
+    typedef pointer_query_columns< ::opencash::model::ManagedObject, id_sqlite, A > ManagedObject;
 
     // name
     //
@@ -149,18 +144,13 @@ namespace odb
     typedef
     sqlite::query_column<
       sqlite::value_traits<
-        ::std::string,
+        ::opencash::model::ManagedObject::Uuid,
         sqlite::id_text >::query_type,
       sqlite::id_text >
     parent_type_;
 
     static const parent_type_ parent;
   };
-
-  template <typename A>
-  const typename pointer_query_columns< ::opencash::model::Account, id_sqlite, A >::uuid_type_
-  pointer_query_columns< ::opencash::model::Account, id_sqlite, A >::
-  uuid (A::table_name, "\"uuid\"", 0);
 
   template <typename A>
   const typename pointer_query_columns< ::opencash::model::Account, id_sqlite, A >::name_type_
@@ -187,23 +177,10 @@ namespace odb
     public access::object_traits< ::opencash::model::Account >
   {
     public:
-    struct id_image_type
+    typedef object_traits_impl< ::opencash::model::ManagedObject, id_sqlite >::id_image_type id_image_type;
+
+    struct image_type: object_traits_impl< ::opencash::model::ManagedObject, id_sqlite >::image_type
     {
-      details::buffer id_value;
-      std::size_t id_size;
-      bool id_null;
-
-      std::size_t version;
-    };
-
-    struct image_type
-    {
-      // _uuid
-      //
-      details::buffer _uuid_value;
-      std::size_t _uuid_size;
-      bool _uuid_null;
-
       // _name
       //
       details::buffer _name_value;
@@ -484,19 +461,12 @@ namespace odb
 
   template <typename A>
   struct query_columns< ::opencash::model::Account, id_sqlite, A >:
-    query_columns_base< ::opencash::model::Account, id_sqlite >
+    query_columns_base< ::opencash::model::Account, id_sqlite >,
+    query_columns< ::opencash::model::ManagedObject, id_sqlite, A >
   {
-    // uuid
+    // ManagedObject
     //
-    typedef
-    sqlite::query_column<
-      sqlite::value_traits<
-        ::std::string,
-        sqlite::id_text >::query_type,
-      sqlite::id_text >
-    uuid_type_;
-
-    static const uuid_type_ uuid;
+    typedef query_columns< ::opencash::model::ManagedObject, id_sqlite, A > ManagedObject;
 
     // name
     //
@@ -539,7 +509,7 @@ namespace odb
     typedef
     sqlite::query_column<
       sqlite::value_traits<
-        ::std::string,
+        ::opencash::model::ManagedObject::Uuid,
         sqlite::id_text >::query_type,
       sqlite::id_text >
     parent_column_type_;
@@ -562,11 +532,6 @@ namespace odb
 
     static const parent_type_ parent;
   };
-
-  template <typename A>
-  const typename query_columns< ::opencash::model::Account, id_sqlite, A >::uuid_type_
-  query_columns< ::opencash::model::Account, id_sqlite, A >::
-  uuid (A::table_name, "\"uuid\"", 0);
 
   template <typename A>
   const typename query_columns< ::opencash::model::Account, id_sqlite, A >::name_type_

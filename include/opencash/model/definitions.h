@@ -1,6 +1,9 @@
 #ifndef __DEFINITIONS_H_
 #define __DEFINITIONS_H_
 
+#include <memory>
+#include <vector>
+
 #define CREATE_ALIAS(x) \
   using x##Ptr = std::shared_ptr<opencash::model::x>; \
   using x##WeakPtr = std::weak_ptr<opencash::model::x>; \
@@ -17,7 +20,7 @@
 
 #define IMPL_COMPARATORS(x) \
   bool x::operator==(const x& rhs) const { \
-    return (this == &rhs) || (this->_uuid == rhs._uuid); \
+    return this == &rhs; \
   } \
   bool x::operator!=(const x& rhs) const { \
     return !(*this == rhs); \

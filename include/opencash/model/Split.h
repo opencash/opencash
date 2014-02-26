@@ -2,7 +2,6 @@
 #define __OC_MODEL_SPLIT_H_
 
 #include "opencash/model/definitions.h"
-#include "opencash/model/ObservableModel.h"
 #include "opencash/model/Transaction.h"
 #include "opencash/model/Account.h"
 
@@ -19,17 +18,14 @@ namespace opencash { namespace model {
   #pragma db object session table("splits") pointer(std::shared_ptr)
   class Split :
     public ::std::enable_shared_from_this<Split>,
-    public ObservableModel {
+    public ManagedObject
+  {
     friend class odb::access;
 
     public:
       CREATE_ALIAS(Split);
 
-      Split(const std::string& uuid);
-
       DECL_COMPARATORS(Split);
-
-      std::string getUuid() const;
 
       TransactionWeakPtr getTransaction() const;
       void setTransaction(TransactionWeakPtr transaction);
@@ -47,11 +43,6 @@ namespace opencash { namespace model {
       void setValue(double value);
 
     private:
-      Split();
-
-      #pragma db id
-      std::string _uuid;
-
       #pragma db not_null
       TransactionWeakPtr _transaction; //pg. 112
 

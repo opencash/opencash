@@ -99,24 +99,18 @@ namespace opencash { namespace controller {
     return transactions;
   }
 
-  static std::string newUUID() {
-    Poco::UUIDGenerator & generator = Poco::UUIDGenerator::defaultGenerator();
-    Poco::UUID uuid(generator.createOne());
-    return uuid.toString();    
-  }
-
   AccountPtr DocumentController::newAccount() const
   {
     // TODO: make sure this UUID doesn't exist in DB yet
-    return AccountPtr(new Account(newUUID()));
+    return AccountPtr(new Account());
   }
 
   SplitPtr DocumentController::newSplit() const {
-    return SplitPtr(new Split(newUUID()));
+    return SplitPtr(new Split());
   }
 
   TransactionPtr DocumentController::newTransaction() const {
-    return TransactionPtr(new Transaction(newUUID()));
+    return TransactionPtr(new Transaction());
   }
 
   void DocumentController::persistAccount(const Account & account) {

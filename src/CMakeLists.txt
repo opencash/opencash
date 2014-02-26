@@ -1,7 +1,9 @@
 set(SOURCES
+  controller/ManagedObjectContext.cpp
   controller/DocumentController.cpp
   controller/ModelObserver.cpp
   model/ObservableModel.cpp
+  model/ManagedObject.cpp
   model/Account.cpp
   model/AccountsMeta.cpp
   model/Transaction.cpp
@@ -10,6 +12,7 @@ set(SOURCES
 )
 
 set(ODB_MODELS
+  ManagedObject
   Account
   AccountsMeta
   Transaction

@@ -10,16 +10,12 @@ IMPORT_ALIAS(Split);
 
 using InSequence = ::testing::InSequence;
 
-const std::string A_UUID = "a_uuid";
-const std::string ANOTHER_UUID = "another_uuid";
-const std::string YET_ANOTHER_UUID = "yet_another_uuid";
-
 TEST(TestAccount, shouldAllowOneParent) {
   // given
-  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAcc(new Account());
   parentAcc->setName("parent");
 
-  AccountPtr childAcc(new Account(ANOTHER_UUID));
+  AccountPtr childAcc(new Account());
   childAcc->setName("child");
 
   // when
@@ -31,13 +27,13 @@ TEST(TestAccount, shouldAllowOneParent) {
 
 TEST(TestAccount, shouldAllowMultipleChildren) {
   // given
-  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAcc(new Account());
   parentAcc->setName("parent");
 
-  AccountPtr childAcc1(new Account(ANOTHER_UUID));
+  AccountPtr childAcc1(new Account());
   childAcc1->setName("child1");
 
-  AccountPtr childAcc2(new Account(YET_ANOTHER_UUID));
+  AccountPtr childAcc2(new Account());
   childAcc2->setName("child2");
 
   // when
@@ -52,13 +48,13 @@ TEST(TestAccount, shouldAllowMultipleChildren) {
 
 TEST(TestAccount, shouldRemoveChildFromParentWhenUnsettingParent) {
   // given
-  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAcc(new Account());
   parentAcc->setName("parent");
 
-  AccountPtr childAcc1(new Account(ANOTHER_UUID));
+  AccountPtr childAcc1(new Account());
   childAcc1->setName("child1");
 
-  AccountPtr childAcc2(new Account(YET_ANOTHER_UUID));
+  AccountPtr childAcc2(new Account());
   childAcc2->setName("child2");
 
   // when
@@ -71,39 +67,11 @@ TEST(TestAccount, shouldRemoveChildFromParentWhenUnsettingParent) {
   ASSERT_EQ(1, parentAcc->getChildren().size());
 }
 
-TEST(TestAccount, shouldCompareEqualityBasedOnlyOnUuid) {
-  // given
-  Account a1(A_UUID);
-  a1.setName("a1");
-
-  Account a2(A_UUID);
-  a2.setName("a2");
-
-  Account another1(ANOTHER_UUID);
-  another1.setName("another1");
-
-  Account another2(ANOTHER_UUID);
-  another2.setName("another2");
-
-  Account a1DiffUuid(ANOTHER_UUID);
-  a1DiffUuid.setName("a1");
-
-  // when
-
-  // then
-  ASSERT_TRUE(a1 == a1);
-  ASSERT_TRUE(a1 == a2);
-  ASSERT_FALSE(a1 == another1);
-  ASSERT_FALSE(a1 == another2);
-  ASSERT_TRUE(another1 == another2);
-  ASSERT_FALSE(a1 == a1DiffUuid);
-}
-
 TEST(TestTransaction, shouldAddSplitIntoAccount) {
   //given
-  AccountPtr account(new Account(A_UUID));
-  SplitPtr split1(new Split(ANOTHER_UUID));
-  SplitPtr split2(new Split(YET_ANOTHER_UUID));
+  AccountPtr account(new Account());
+  SplitPtr split1(new Split());
+  SplitPtr split2(new Split());
 
   //when
   account->addSplit(split1);
@@ -118,10 +86,10 @@ TEST(TestTransaction, shouldAddSplitIntoAccount) {
 
 TEST(TestAccount, shouldNotTriggerParentChangedWhenSettingToSameParent) {
   // given
-  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAcc(new Account());
   AccountPtr parentAccRef(parentAcc);
 
-  AccountPtr childAcc1(new Account(ANOTHER_UUID));
+  AccountPtr childAcc1(new Account());
   MockModelObserver childObs1(*childAcc1);
 
   {
@@ -140,7 +108,7 @@ TEST(TestAccount, shouldNotTriggerParentChangedWhenSettingToSameParent) {
 }
 
 TEST(TestAccount, shouldNotTriggerParentChangedWhenUnsettingParentIfAccountHasNoParent) {
-  AccountPtr accountWithoutParent(new Account(A_UUID));
+  AccountPtr accountWithoutParent(new Account());
   MockModelObserver accountObserver(*accountWithoutParent);
 
   EXPECT_CALL(accountObserver, willChange("parent"))
@@ -148,17 +116,16 @@ TEST(TestAccount, shouldNotTriggerParentChangedWhenUnsettingParentIfAccountHasNo
   EXPECT_CALL(accountObserver, didChange("parent"))
 		.Times(0);
 
-  //when
+  // when
   accountWithoutParent->unsetParent();
 
-  //then
+  // then
   // mock expectations implicitly verified
 }
 	
-
 TEST(TestAccount, shouldTriggerMemberObserverEvents) {
   // given
-  Account acc(A_UUID);
+  Account acc;
   MockModelObserver obs(acc);
 
   {
@@ -185,13 +152,13 @@ TEST(TestAccount, shouldTriggerMemberObserverEvents) {
 
 TEST(TestAccount, shouldTriggerParentChildrenObserverEvents) {
   // given
-  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAcc(new Account());
   MockModelObserver parentObs(*parentAcc);
 
-  AccountPtr childAcc1(new Account(ANOTHER_UUID));
+  AccountPtr childAcc1(new Account());
   MockModelObserver childObs1(*childAcc1);
 
-  AccountPtr childAcc2(new Account(YET_ANOTHER_UUID));
+  AccountPtr childAcc2(new Account());
   MockModelObserver childObs2(*childAcc2);
 
   {
