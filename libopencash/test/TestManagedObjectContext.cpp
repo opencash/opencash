@@ -23,6 +23,7 @@ TEST_F(TestManagedObjectContext, shouldCreateAccount) {
   // then
   ASSERT_TRUE(account != NULL);
   ASSERT_FALSE(account->getUuid().empty());
+  ASSERT_TRUE(_moc.hasUuid(account->getUuid()));
 }
 
 TEST_F(TestManagedObjectContext, shouldCreateSplit) {
@@ -34,4 +35,5 @@ TEST_F(TestManagedObjectContext, shouldCreateSplit) {
   // then
   ASSERT_TRUE(split != NULL);
   ASSERT_FALSE(split->getUuid().empty());
+  ASSERT_TRUE(_moc.hasUuid(split->getUuid()));
 }
