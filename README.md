@@ -25,6 +25,7 @@ open opencash-xcode/OpenCash.xcworkspace
 ├── README.md        # This current file
 ├── libopencash      # Shared core in C++
 ├── opencash-android # Android app built on top of libopencash (NDK)
+├── opencash-cli     # CLI app built on top of libopencash in C++
 ├── opencash-cocoa   # Cocoa framework around libopencash
 ├── opencash-ios     # iOS app built on top of opencash-cocoa
 ├── opencash-osx     # Mac app built on top of opencash-cocoa
