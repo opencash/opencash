@@ -1,0 +1,43 @@
+apply plugin: 'cpp'
+
+executables {
+    opencash {}
+    unittests {}
+    featuretests {}
+}
+
+sources {
+    opencash {
+        cpp {
+            source {
+              srcDirs = ['src/opencash/cpp']
+              include "**/*.cpp"
+            }
+            exportedHeaders {
+              srcDirs = ['src/opencash/headers']
+            }
+        }
+    }
+    featuretests {
+        cpp {
+            source {
+              srcDirs = ['src/opencash/cpp', 'src/featuretests/cpp']
+              include "**/*.cpp"
+            }
+            exportedHeaders {
+              srcDirs = ['src/featuretests/headers', 'src/opencash/cpp',
+                'src/opencash/headers']
+            }
+        }
+    }
+}
+
+binaries.all {
+    if (toolChain in Gcc || toolChain in Clang) {
+        cppCompiler.args "-std=c++11", "-g"
+    }
+    if (toolChain in VisualCpp) {
+        // don't know how to add C++11 support
+    }
+}
+
