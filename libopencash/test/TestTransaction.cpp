@@ -1,5 +1,5 @@
-#include "opencash/model/Transaction.h"
-#include "opencash/model/Split.h"
+#include "opencash/core/Transaction.h"
+#include "opencash/core/Split.h"
 #include "mock/MockModelObserver.h"
 
 #include <gtest/gtest.h>

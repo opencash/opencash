@@ -1,5 +1,5 @@
-#include "opencash/model/Account.h"
-#include "opencash/model/Split.h"
+#include "opencash/core/Account.h"
+#include "opencash/core/Split.h"
 #include "mock/MockModelObserver.h"
 
 #include <gtest/gtest.h>
@@ -162,8 +162,8 @@ TEST(TestAccount, shouldTriggerParentChildrenObserverEvents) {
   MockModelObserver childObs2(*childAcc2);
 
   {
-    using opencash::model::ObservableModel::ChangeType::Insertion;
-    using opencash::model::ObservableModel::ChangeType::Removal;
+    using opencash::core::ObservableModel::ChangeType::Insertion;
+    using opencash::core::ObservableModel::ChangeType::Removal;
 
     InSequence dummy;
 

@@ -140,7 +140,7 @@ link_directories(
 add_subdirectory(vendor/poco)
 add_subdirectory(vendor/libodb)
 add_subdirectory(vendor/libodb-sqlite)
-add_subdirectory(src)
+add_subdirectory(src/core)
 
 if(OC_TESTS)
   enable_testing()
