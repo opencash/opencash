@@ -14,7 +14,7 @@ namespace opencash { namespace cli {
       int _estat;
   };
 
-  Cli::Cli(std::ostream& cout) : _ctx(cout) {}
+  Cli::Cli(std::ostream& cout, std::ostream& cerr) : _ctx(cout, cerr) {}
 
   int Cli::run(int argc, const char **argv) {
     std::ostream& cout(_ctx.cout);
@@ -38,11 +38,9 @@ namespace opencash { namespace cli {
     return 0;
   }
 
-  void Cli::parseOptions(int argc, const char **argv) {
-    // TCLAP prints to std::cout so we need to hijack std::cout
-    // while parsing
-    std::streambuf *coutBackup = std::cout.rdbuf();
-    std::cout.rdbuf(_ctx.cout.rdbuf());
+  void Cli::parseOptions(int argc, const char** argv) {
+    // TCLAP prints to standard io so we need to hijack these streams
+    hijackStdIo();
 
     try {
       TCLAP::CmdLine parser("OpenCash, a free open-source accounting software.",
@@ -73,16 +71,28 @@ namespace opencash { namespace cli {
     }
     catch (TCLAP::ArgException& e) {
       std::cerr << "error: " << e.what() << std::endl;
-      std::cout.rdbuf(coutBackup);
+      restoreStdIo();
       throw ExitException(1);
     }
     catch (TCLAP::ExitException& e) {
-      std::cout.rdbuf(coutBackup);
+      restoreStdIo();
       throw ExitException(e.getExitStatus());
     }
 
-    // Restore std::cout
-    std::cout.rdbuf(coutBackup);
+    restoreStdIo();
+  }
+
+  void Cli::hijackStdIo() {
+    _ioBackups.cout = std::cout.rdbuf();
+    std::cout.rdbuf(_ctx.cout.rdbuf());
+
+    _ioBackups.cerr = std::cerr.rdbuf();
+    std::cerr.rdbuf(_ctx.cerr.rdbuf());
+  }
+
+  void Cli::restoreStdIo() {
+    std::cout.rdbuf(_ioBackups.cout);
+    std::cerr.rdbuf(_ioBackups.cerr);
   }
 
 }}

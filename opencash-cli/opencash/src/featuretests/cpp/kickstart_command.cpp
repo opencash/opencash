@@ -3,14 +3,15 @@ using namespace igloo;
 
 #include "Cli.h"
 
+using Cli = opencash::cli::Cli;
+
 Context(kickstart_command)
 {
   Spec(should_run)
   {
     std::stringstream cout;
-    opencash::cli::Cli cli(cout);
     const char *argv[] = {Name().c_str(), "kickstart"};
-    cli.run(2, argv);
+    opencash::cli::Cli(cout).run(2, argv);
     Assert::That(cout.str(), Contains("Running command: kickstart"));
   }
 };
