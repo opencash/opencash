@@ -1,10 +1,10 @@
-#include "opencash/controller/ManagedObjectContext.h"
-#include "opencash/model/Account.h"
-#include "opencash/model/Split.h"
+#include "opencash/core/ManagedObjectContext.h"
+#include "opencash/core/Account.h"
+#include "opencash/core/Split.h"
 
 #include <gtest/gtest.h>
 
-using ManagedObjectContext = opencash::controller::ManagedObjectContext;
+using ManagedObjectContext = opencash::core::ManagedObjectContext;
 
 IMPORT_ALIAS(Account);
 IMPORT_ALIAS(Split);

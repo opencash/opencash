@@ -1,20 +1,20 @@
 #ifndef __OC_MOCK_MODELOBSERVER_H_
 #define __OC_MOCK_MODELOBSERVER_H_
 
-#include "opencash/controller/ModelObserver.h"
+#include "opencash/core/ModelObserver.h"
 
 #include <string>
 #include <gmock/gmock.h>
 
-namespace opencash { namespace model {
+namespace opencash { namespace core {
   class ObservableModel;
 }}
 
-using opencash::controller::ModelObserver;
-using opencash::model::ObservableModel;
+using opencash::core::ModelObserver;
+using opencash::core::ObservableModel;
 
 class MockModelObserver : public ModelObserver {
-  using ChangeType = opencash::model::ObservableModel::ChangeType;
+  using ChangeType = opencash::core::ObservableModel::ChangeType;
 
   public:
     MockModelObserver(ObservableModel & model) : ModelObserver(model) {}

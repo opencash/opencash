@@ -1,18 +1,18 @@
-#include "opencash/controller/DocumentController.h"
-#include "opencash/controller/ManagedObjectContext.h"
-#include "opencash/model/Account.h"
-#include "opencash/model/Split.h"
-#include "opencash/model/Transaction.h"
-#include "opencash/model/AccountsMeta.h"
-#include "opencash/model/TransactionsMeta.h"
+#include "opencash/core/DocumentController.h"
+#include "opencash/core/ManagedObjectContext.h"
+#include "opencash/core/Account.h"
+#include "opencash/core/Split.h"
+#include "opencash/core/Transaction.h"
+#include "opencash/core/AccountsMeta.h"
+#include "opencash/core/TransactionsMeta.h"
 #include "mock/MockModelObserver.h"
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-using DocumentController = opencash::controller::DocumentController;
-using ManagedObjectContext = opencash::controller::ManagedObjectContext;
-using AccountsMeta = opencash::model::AccountsMeta;
+using DocumentController = opencash::core::DocumentController;
+using ManagedObjectContext = opencash::core::ManagedObjectContext;
+using AccountsMeta = opencash::core::AccountsMeta;
 
 IMPORT_ALIAS(Account);
 IMPORT_ALIAS(Split);
