@@ -20,9 +20,14 @@ model {
     }
 
     platforms {
-        "osx-x64" {
+        "osx-amd64" {
             operatingSystem "mac os x"
-            architecture "x86_64"
+            architecture "amd64"
+        }
+
+        "linux-amd64" {
+            operatingSystem "linux"
+            architecture "amd64"
         }
 
         "android-arm" {
@@ -121,7 +126,9 @@ task build {
 task test {
     description "Build and run all tests for current platform."
     def testExecutables = binaries.withType(ExecutableBinary).matching {
-        it.purpose == "test" && it.targetPlatform.operatingSystem.current
+        it.purpose == "test" &&
+            it.targetPlatform.operatingSystem.current &&
+            it.targetPlatform.architecture.name == System.properties['os.arch']
     }
     dependsOn testExecutables
 
