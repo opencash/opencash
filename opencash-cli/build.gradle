@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         maven {
-            url "http://sgeb.github.io/maven_repo/"
+            url "https://sgeb.github.io/maven_repo/"
         }
     }
 
