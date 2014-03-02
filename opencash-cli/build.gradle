@@ -133,6 +133,8 @@ task test {
     }
 }
 
+task check(dependsOn: test)
+
 task describe << {
     println "Running on  : " + org.gradle.internal.os.OperatingSystem.current()
     println "Gradle      : " + gradle.gradleVersion
