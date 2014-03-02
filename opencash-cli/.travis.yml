@@ -2,4 +2,4 @@ language: cpp
 compiler:
   - gcc
   - clang
-script: "./gradlew --no-color -q test"
+script: "./gradlew --no-color -q tasks --all describe test"
