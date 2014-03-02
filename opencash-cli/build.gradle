@@ -1,3 +1,167 @@
+buildscript {
+    repositories {
+        maven {
+            url "$projectDir/../../maven_repo"
+        }
+    }
+
+    dependencies {
+        classpath "me.sgeb.gradle.plugins:gradle-android-arm-clang-plugin:0.1.0"
+    }
+}
+
+apply plugin: 'cpp'
+apply plugin: 'android-arm-clang'
+
+model {
+    buildTypes {
+        debug
+        release
+    }
+
+    platforms {
+        "osx-x64" {
+            operatingSystem "mac os x"
+            architecture "x86_64"
+        }
+
+        "android-arm" {
+            operatingSystem "linux"
+            architecture "arm"
+        }
+    }
+}
+
+sources {
+    cliLib {
+        cpp {
+            source.srcDirs = ['src/cli/cpp']
+            source.include "**/*.cpp"
+            source.exclude 'main.cpp'
+        }
+    }
+
+    cli {
+        cpp {
+            source.srcDirs = ['src/cli/cpp']
+            source.include 'main.cpp'
+        }
+    }
+
+    featureTests {
+        cpp {
+            source.srcDirs = ['src/featuretests/cpp']
+            source.include "**/*.cpp"
+        }
+    }
+}
+
+libraries {
+    cliLib {
+        binaries.all {
+            cppCompiler.args "-I${projectDir}/src/cli/cpp/vendor"
+        }
+    }
+}
+
+executables {
+    all { binaries.all { ext.purpose = null } }
+
+    cli {
+        baseName 'opencash'
+
+        binaries.all {
+            lib libraries.cliLib.static
+        }
+    }
+
+    featureTests {
+        binaries.all {
+            purpose = "test"
+            targetBuildTypes "debug"
+
+            cppCompiler.args "-I${projectDir}/src/featuretests/cpp/vendor"
+            cppCompiler.args "-I${projectDir}/src/cli/cpp"
+            lib libraries.cliLib.static
+        }
+    }
+}
+
+binaries.all {
+    // add debug flags
+    if (buildType == buildTypes.debug) {
+        if (toolChain in Gcc || toolChain in Clang) {
+            cppCompiler.args "-g"
+        }
+        if (toolChain in VisualCpp) {
+            cppCompiler.args '/Zi'
+            cppCompiler.define 'DEBUG'
+            linker.args '/DEBUG'
+        }
+    }
+
+    // add release flags
+    if (buildType == buildTypes.release) {
+        if (toolChain in Gcc || toolChain in Clang) {
+            cppCompiler.args "-O2"
+        }
+    }
+
+    // add c++11 flags
+    if (toolChain in Gcc || toolChain in Clang) {
+        cppCompiler.args "-std=c++11"
+    }
+}
+
+task build {
+    description "Build all binaries on all possible platforms."
+    dependsOn binaries.matching { it.buildable }
+}
+
+task test {
+    description "Build and run all tests for current platform."
+    def testExecutables = binaries.withType(ExecutableBinary).matching {
+        it.purpose == "test" && it.targetPlatform.operatingSystem.current
+    }
+    dependsOn testExecutables
+
+    doLast {
+        testExecutables.all { test ->
+            println ">>> ${test.executableFile}"
+            exec { commandLine test.executableFile }
+        }
+    }
+}
+
+task describe << {
+    println "Running on  : " + org.gradle.internal.os.OperatingSystem.current()
+    println "Gradle      : " + gradle.gradleVersion
+    println "Java home   : " + System.properties.'java.home'
+    println ""
+    println "Project     : " + project.name
+    println "Subprojects : " + project.subprojects
+    println "BuildDir    : " + buildDir
+    println "Executables : " + project.executables
+    println "Libraries   : " + project.libraries
+    println "Sources     : " + project.sources
+
+    println ""
+    println "Binaries:"
+    project.binaries.withType(ExecutableBinary).all { println "\t${it}" }
+    project.binaries.withType(LibraryBinary).all { println "\t${it}" }
+
+    project.sources.all { funcSourceSet ->
+        println ""
+        println "Source info '${funcSourceSet.name}':"
+        funcSourceSet.all { langSourceSet ->
+            println "\t${langSourceSet}"
+            langSourceSet.source.files.each { println "\t\t${it}" }
+        }
+    }
+}
+
 task wrapper(type: Wrapper) {
     gradleVersion = '1.11'
 }
+
+defaultTasks("tasks")
