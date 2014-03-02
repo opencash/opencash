@@ -7,6 +7,8 @@ limited.
 
 _This project is not usable yet!_
 
+[![Build Status](https://travis-ci.org/opencash/opencash-cli.png?branch=master)](https://travis-ci.org/opencash/opencash-cli)
+
 # What is `opencash-cli`?
 
 `opencash-cli` is the command line app of OpenCash, a free open-source

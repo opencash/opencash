@@ -2,4 +2,4 @@ language: cpp
 compiler:
   - gcc
   - clang
-script: "./gradlw test"
+script: "./gradlew test"
