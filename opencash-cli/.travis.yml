@@ -2,4 +2,5 @@ language: cpp
 compiler:
   - gcc
   - clang
+before_install: "./travis-diagnostics.sh"
 script: "./gradlew --no-color -q tasks --all describe test"
