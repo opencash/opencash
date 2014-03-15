@@ -7,22 +7,23 @@ buildscript {
 
     dependencies {
         classpath "me.sgeb.gradle.plugins:gradle-android-arm-clang-plugin:0.1.0"
+        classpath "me.sgeb.gradle:gradle-native-artifacts-plugin:1.0.0"
     }
 }
 
 apply plugin: 'cpp'
 apply plugin: 'android-arm-clang'
+apply plugin: 'native-artifacts'
+
+group "com.github.opencash"
+version "0.1.0"
+status "integration"
 
 model {
-    buildTypes {
-        debug
-        release
-    }
-
     platforms {
-        "osx-amd64" {
+        "osx-x86_64" {
             operatingSystem "mac os x"
-            architecture "amd64"
+            architecture "x86_64"
         }
 
         "linux-amd64" {
@@ -33,6 +34,43 @@ model {
         "android-arm" {
             operatingSystem "linux"
             architecture "arm"
+        }
+    }
+
+    buildTypes {
+        debug
+        release
+    }
+}
+
+libraries.all { ext.purpose = null }
+libraries {
+    cliLib {
+        binaries.all {
+            cppCompiler.args "-I${projectDir}/src/cli/cpp/vendor"
+        }
+    }
+}
+
+executables.all { ext.purpose = null }
+executables {
+    cli {
+        baseName 'opencash'
+
+        binaries.all {
+            lib libraries.cliLib.static
+        }
+    }
+
+    featureTests {
+        purpose = "test"
+
+        binaries.all {
+            targetBuildTypes "debug"
+
+            cppCompiler.args "-I${projectDir}/src/featuretests/cpp/vendor"
+            cppCompiler.args "-I${projectDir}/src/cli/cpp"
+            lib libraries.cliLib.static
         }
     }
 }
@@ -61,38 +99,13 @@ sources {
     }
 }
 
-libraries {
-    cliLib {
-        binaries.all {
-            cppCompiler.args "-I${projectDir}/src/cli/cpp/vendor"
-        }
-    }
-}
-
-executables {
-    all { binaries.all { ext.purpose = null } }
-
-    cli {
-        baseName 'opencash'
-
-        binaries.all {
-            lib libraries.cliLib.static
-        }
-    }
-
-    featureTests {
-        binaries.all {
-            purpose = "test"
-            targetBuildTypes "debug"
-
-            cppCompiler.args "-I${projectDir}/src/featuretests/cpp/vendor"
-            cppCompiler.args "-I${projectDir}/src/cli/cpp"
-            lib libraries.cliLib.static
-        }
-    }
-}
-
 binaries.all {
+    // add include and lib paths
+    if (toolChain in Gcc || toolChain in Clang) {
+        cppCompiler.args "-I${it.narDepsDir}/include"
+        linker.args "-L${it.narDepsDir}/lib"
+    }
+
     // add debug flags
     if (buildType == buildTypes.debug) {
         if (toolChain in Gcc || toolChain in Clang) {
@@ -119,14 +132,14 @@ binaries.all {
 }
 
 task build {
-    description "Build all binaries on all possible platforms."
+    description "Builds all binaries on all buildable platforms."
     dependsOn binaries.matching { it.buildable }
 }
 
 task test {
-    description "Build and run all tests for current platform."
+    description "Builds and runs all tests for current platform."
     def testExecutables = binaries.withType(ExecutableBinary).matching {
-        it.purpose == "test" &&
+        it.component.purpose == "test" &&
             it.targetPlatform.operatingSystem.current &&
             it.targetPlatform.architecture.name == System.properties['os.arch']
     }
@@ -134,42 +147,43 @@ task test {
 
     doLast {
         testExecutables.all { test ->
-            println ">>> ${test.executableFile}"
             exec { commandLine test.executableFile }
         }
     }
 }
 
-task check(dependsOn: test)
-
-task describe << {
-    println "Running on  : " + org.gradle.internal.os.OperatingSystem.current()
-    println "Gradle      : " + gradle.gradleVersion
-    println "Java home   : " + System.properties.'java.home'
-    println ""
-    println "Project     : " + project.name
-    println "Subprojects : " + project.subprojects
-    println "BuildDir    : " + buildDir
-    println "Executables : " + project.executables
-    println "Libraries   : " + project.libraries
-    println "Sources     : " + project.sources
-
-    println ""
-    println "Binaries:"
-    project.binaries.withType(ExecutableBinary).all { println "\t${it}" }
-    project.binaries.withType(LibraryBinary).all { println "\t${it}" }
-
-    project.sources.all { funcSourceSet ->
+task describe {
+    description 'Prints additional information on the build and the system.'
+    doLast {
+        println "Running on  : " + org.gradle.internal.os.OperatingSystem.current()
+        println "Gradle      : " + gradle.gradleVersion
+        println "Java home   : " + System.properties.'java.home'
         println ""
-        println "Source info '${funcSourceSet.name}':"
-        funcSourceSet.all { langSourceSet ->
-            println "\t${langSourceSet}"
-            langSourceSet.source.files.each { println "\t\t${it}" }
+        println "Project     : " + project.name
+        println "Subprojects : " + project.subprojects
+        println "BuildDir    : " + buildDir
+        println "Executables : " + project.executables
+        println "Libraries   : " + project.libraries
+        println "Sources     : " + project.sources
+
+        println ""
+        println "Binaries:"
+        project.binaries.withType(ExecutableBinary).all { println "\t${it}" }
+        project.binaries.withType(LibraryBinary).all { println "\t${it}" }
+
+        project.sources.all { funcSourceSet ->
+            println ""
+            println "Source info '${funcSourceSet.name}':"
+            funcSourceSet.all { langSourceSet ->
+                println "\t${langSourceSet}"
+                langSourceSet.source.files.each { println "\t\t${it}" }
+            }
         }
     }
 }
 
 task wrapper(type: Wrapper) {
+    description 'Updates the wrapper'
     gradleVersion = '1.11'
 }
 
