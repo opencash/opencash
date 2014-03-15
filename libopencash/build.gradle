@@ -1,0 +1,194 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://sgeb.github.io/maven_repo/"
+        }
+    }
+
+    dependencies {
+        classpath "me.sgeb.gradle.plugins:gradle-android-arm-clang-plugin:0.+"
+        classpath "me.sgeb.gradle:gradle-native-artifacts-plugin:1.1.0-SNAPSHOT"
+    }
+}
+
+apply plugin: 'cpp'
+apply plugin: 'android-arm-clang'
+apply plugin: 'native-artifacts'
+apply plugin: 'ivy-publish'
+
+group "com.github.opencash"
+version "0.1.0"
+status "integration"
+
+repositories {
+    ivy {
+        url "https://opencash.github.io/ivy_repo/"
+    }
+}
+
+model {
+    platforms {
+        "osx-x86_64" {
+            operatingSystem "osx"
+            architecture "x86_64"
+        }
+
+        /* "linux-amd64" { */
+        /*     operatingSystem "linux" */
+        /*     architecture "amd64" */
+        /* } */
+
+        "android-arm" {
+            operatingSystem "linux"
+            architecture "arm"
+        }
+    }
+
+    buildTypes {
+        debug
+        release
+    }
+}
+
+libraries.all { ext.purpose = null }
+libraries {
+    opencash {
+        binaries.all { binary ->
+            cppCompiler.args '-I', "$projectDir/src/core/generated" // TODO: ugly hack for relative includes, needs fixing!
+
+            if (binary instanceof SharedLibraryBinary) {
+                linker.args '-lPocoFoundation'
+                linker.args '-lodb-sqlite'
+                linker.args '-lodb'
+                linker.args '-lsqlite3'
+            }
+        }
+    }
+}
+
+executables.all { ext.purpose = null }
+executables {
+    TestAccount {
+        purpose = 'test'
+    }
+
+    TestDocumentController {
+        purpose = 'test'
+    }
+
+    all {
+        binaries.all { binary ->
+            targetBuildTypes "debug"
+
+            lib libraries.opencash.static
+
+            def narClassifier = legacyClassifier(binary.targetPlatform.name)
+            project.dependencies {
+                add binary.narConfName, "me.sgeb.opencash.vendor:gmock:1.7.0:${narClassifier}@nar"
+                add binary.narConfName, "me.sgeb.opencash.vendor:gtest:1.7.0:${narClassifier}@nar"
+            }
+
+            cppCompiler.args '-I', "$projectDir/src" // TODO: ugly hack for relative includes, needs fixing!
+
+            linker.args '-lPocoFoundation'
+            linker.args '-lodb-sqlite'
+            linker.args '-lodb'
+            linker.args '-lsqlite3'
+            linker.args '-lgtest'
+            linker.args '-lgtest_main'
+            linker.args '-lgmock'
+            linker.args '-lgmock_main'
+        }
+    }
+}
+
+binaries.all { binary ->
+    def narClassifier = legacyClassifier(binary.targetPlatform.name)
+    project.dependencies {
+        add binary.narConfName, "me.sgeb.opencash.vendor:poco:1.5.2:${narClassifier}@nar"
+        add binary.narConfName, "me.sgeb.opencash.vendor:libodb:2.3.0:${narClassifier}@nar"
+        add binary.narConfName, "me.sgeb.opencash.vendor:libodb-sqlite:2.3.0:${narClassifier}@nar"
+    }
+
+    if (toolChain in Gcc || toolChain in Clang) {
+        cppCompiler.args '-std=c++11'
+        cppCompiler.args "-I${binary.narDepsDir}/include"
+        linker.args "-L${binary.narDepsDir}/lib"
+    }
+}
+
+sources {
+    opencash {
+        cpp {
+            source {
+                srcDir "src"
+                include "**/*.cpp"
+                include "**/*.cxx"
+            }
+            exportedHeaders {
+                srcDir "include"
+            }
+        }
+    }
+
+    TestAccount {
+        cpp {
+            source {
+                srcDir "test"
+                include "TestAccount.cpp"
+            }
+            exportedHeaders {
+                srcDir "include"
+            }
+        }
+    }
+
+    TestDocumentController {
+        cpp {
+            source {
+                srcDir "test"
+                include "TestDocumentController.cpp"
+            }
+            exportedHeaders {
+                srcDir "include"
+            }
+        }
+    }
+}
+
+task build {
+    description "Builds all binaries on all buildable platforms."
+    dependsOn binaries.matching { it.buildable }
+}
+
+task test {
+    description "Builds and runs all tests for current platform."
+    def testExecutables = binaries.withType(ExecutableBinary).matching {
+        it.component.purpose == "test" &&
+            it.targetPlatform.operatingSystem.current &&
+            it.targetPlatform.architecture.name == System.properties['os.arch']
+    }
+    dependsOn testExecutables
+
+    doLast {
+        testExecutables.all { test ->
+            exec { commandLine test.executableFile }
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    description 'Updates the wrapper'
+    gradleVersion = '1.11'
+}
+
+defaultTasks("tasks")
+
+
+def legacyClassifier(String platformName) {
+    def platformClassifierMap = [
+        'osx-x86_64': 'x86_64-apple-darwin13.0.0',
+        'android-arm': 'arm-linux-androideabi']
+
+    platformClassifierMap[platformName]
+}
