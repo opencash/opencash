@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.7)
 project(libodb-sqlite_builder C CXX)
 include(ExternalProject)
 
@@ -9,16 +9,17 @@ else()
 endif()
 
 if(OC_PLATFORM_IOS_DEVICE)
-  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=armv7 --build=x86_64 --disable-threads)
+  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=armv7 --build=x86_64)
 elseif(OC_PLATFORM_IOS_SIMULATOR)
-  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=i386 --build=x86_64 --disable-threads)
+  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=i386 --build=x86_64)
 elseif(OC_PLATFORM_ANDROID)
-  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=arm-linux-androideabi --build=x86_64 --disable-threads)
+  set(CONFIGURE_ARGS ${CONFIGURE_ARGS} --host=arm-linux-androideabi --build=x86_64)
 endif()
 
 ExternalProject_Add(libodb-sqlite
   URL http://www.codesynthesis.com/download/odb/2.3/libodb-sqlite-2.3.0.tar.gz
-  URL_HASH SHA1=2643d3c2c3f273f3fb223759e4ad10635cc91ce8
+  URL_MD5 e893668bc9f906e06576d720bb1992e4
+  #URL_HASH SHA1=2643d3c2c3f273f3fb223759e4ad10635cc91ce8
   SOURCE_DIR ${PROJECT_BINARY_DIR}/src/libodb-sqlite
 
   PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
@@ -29,6 +30,7 @@ ExternalProject_Add(libodb-sqlite
 
   CONFIGURE_COMMAND <SOURCE_DIR>/configure
     --prefix=<INSTALL_DIR>
+    --disable-threads
     CXX=${CMAKE_CXX_COMPILER}
     CXXFLAGS=${CMAKE_CXX_FLAGS}
     LDFLAGS=-L${OC_INSTALL_LIB_DIR}
@@ -38,10 +40,10 @@ ExternalProject_Add(libodb-sqlite
   BUILD_COMMAND make -j4 all
 
   # Wrap download, configure and build steps in a script to log output
-  LOG_DOWNLOAD ON
-  LOG_CONFIGURE ON
-  LOG_BUILD ON
-  LOG_INSTALL ON
+  LOG_DOWNLOAD ${OC_QUIET_EXTERNALPROJECT}
+  LOG_CONFIGURE ${OC_QUIET_EXTERNALPROJECT}
+  LOG_BUILD ${OC_QUIET_EXTERNALPROJECT}
+  LOG_INSTALL ${OC_QUIET_EXTERNALPROJECT}
 )
 
 if(OC_PLATFORM_ANDROID)
@@ -68,10 +70,10 @@ if(OC_PLATFORM_ANDROID)
     BUILD_COMMAND make -j4 all
 
     # Wrap download, configure and build steps in a script to log output
-    LOG_DOWNLOAD ON
-    LOG_CONFIGURE ON
-    LOG_BUILD ON
-    LOG_INSTALL ON
+    LOG_DOWNLOAD ${OC_QUIET_EXTERNALPROJECT}
+    LOG_CONFIGURE ${OC_QUIET_EXTERNALPROJECT}
+    LOG_BUILD ${OC_QUIET_EXTERNALPROJECT}
+    LOG_INSTALL ${OC_QUIET_EXTERNALPROJECT}
   )
 
   add_dependencies(libodb-sqlite libsqlite3)

@@ -1,13 +1,20 @@
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.7)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set(OC_LIB_NAME opencash)
 set(OC_PROJECT_NAME "lib${OC_LIB_NAME}")
 
+option(OC_VERBOSE "Print verbose build progress (default: off)." OFF)
 option(OC_DEBUG "Build a debug version of ${OC_PROJECT_NAME} and its dependencies (default: build a release version)." OFF)
 option(OC_STATIC "Build a static version of ${OC_PROJECT_NAME} and its dependencies (default: enabled)." ON)
 option(OC_TESTS "Build all of ${OC_PROJECT_NAME}'s unit tests (default: OFF)." OFF)
 set(OC_PLATFORM "host" CACHE STRING "Build ${OC_PROJECT_NAME} for a particular platform. Options are 'host', 'ios-device', 'ios-simulator' or 'android' (default: host).")
+
+if(OC_VERBOSE)
+  set(OC_QUIET_EXTERNALPROJECT OFF)
+else()
+  set(OC_QUIET_EXTERNALPROJECT ON)
+endif()
 
 if(OC_DEBUG)
   set(CMAKE_BUILD_TYPE "Debug")
@@ -58,6 +65,7 @@ if(OC_PLATFORM_IOS_DEVICE OR OC_PLATFORM_IOS_SIMULATOR)
 endif()
 
 if(OC_PLATFORM_ANDROID)
+  # the android standlone toolchain must contain clang
   set(ANDROID_COMPILER_IS_CLANG 1)
   set(LIBRARY_OUTPUT_PATH_ROOT ${CMAKE_BINARY_DIR}/out CACHE PATH "root for library output" FORCE)
   # Must be included before project declaration
@@ -73,6 +81,22 @@ set(OC_CXX_ADDITIONAL_FLAGS "-Wall -std=c++11 -Wno-unknown-pragmas")
 if(NOT OC_PLATFORM_ANDROID)
   set(OC_CXX_ADDITIONAL_FLAGS "${OC_CXX_ADDITIONAL_FLAGS} -stdlib=libc++")
 endif()
+
+
+# Compiler-specific C++11 activation.
+#if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+#  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
+#  if(NOT (GCC_VERSION VERSION_GREATER 4.7 OR GCC_VERSION VERSION_EQUAL 4.7))
+#    message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.7 or greater.")
+#  endif()
+#elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+#  set(OC_CXX_ADDITIONAL_FLAGS "${OC_CXX_ADDITIONAL_FLAGS} -stdlib=libc++")
+#elseif((OC_PLATFORM_IOS_DEVICE OR OC_PLATFORM_IOS_SIMULATOR) AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "g\\+\\+")
+#  # empty
+#else()
+#  message(FATAL_ERROR "Your C++ compiler does not support C++11 (CXX_COMPILER_ID='${CMAKE_CXX_COMPILER_ID}').")
+#endif()
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OC_C_ADDITIONAL_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OC_CXX_ADDITIONAL_FLAGS}")
 
@@ -93,12 +117,16 @@ set(OC_INSTALL_DIR ${CMAKE_BINARY_DIR}/out)
 set(OC_INSTALL_INCLUDE_DIR ${OC_INSTALL_DIR}/include)
 set(OC_INSTALL_LIB_DIR ${OC_INSTALL_DIR}/lib)
 
+message(STATUS "OC_VERBOSE: ${OC_VERBOSE}")
 message(STATUS "OC_DEBUG: ${OC_DEBUG}")
 message(STATUS "OC_STATIC: ${OC_STATIC}")
 message(STATUS "OC_TESTS: ${OC_TESTS}")
 message(STATUS "OC_PLATFORM: ${OC_PLATFORM}")
-#message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-#message(STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
+
+if(OC_VERBOSE)
+  message(STATUS "CMAKE_C_FLAGS: ${CMAKE_C_FLAGS}")
+  message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+endif()
 
 include_directories(
   ./include/
@@ -112,7 +140,7 @@ link_directories(
 add_subdirectory(vendor/poco)
 add_subdirectory(vendor/libodb)
 add_subdirectory(vendor/libodb-sqlite)
-add_subdirectory(src)
+add_subdirectory(src/core)
 
 if(OC_TESTS)
   enable_testing()

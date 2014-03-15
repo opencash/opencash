@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.7)
 project(poco_builder C CXX)
 include(ExternalProject)
 
@@ -25,8 +25,6 @@ endif()
 ExternalProject_Add(poco
   URL https://github.com/pocoproject/poco/archive/poco-1.5.2-release.tar.gz
   URL_MD5 4ed751311fe4eb437a485139fcfdf558
-  # URL http://pocoproject.org/releases/poco-1.4.6/poco-1.4.6p2.tar.gz
-  # URL_MD6 33f6a0b7e7fd6b86a1028b1e7fa78b84
   SOURCE_DIR ${PROJECT_BINARY_DIR}/src/poco
 
   PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
@@ -59,8 +57,8 @@ ExternalProject_Add(poco
   INSTALL_COMMAND make -f Makefile -f Makefile-custom my_install
 
   # Wrap download, configure and build steps in a script to log output
-  LOG_DOWNLOAD ON
-  LOG_CONFIGURE ON
-  LOG_BUILD ON
-  LOG_INSTALL ON
+  LOG_DOWNLOAD ${OC_QUIET_EXTERNALPROJECT}
+  LOG_CONFIGURE ${OC_QUIET_EXTERNALPROJECT}
+  LOG_BUILD ${OC_QUIET_EXTERNALPROJECT}
+  LOG_INSTALL ${OC_QUIET_EXTERNALPROJECT}
 )

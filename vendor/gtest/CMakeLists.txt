@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8.7)
 project(gtest_builder C CXX)
 include(ExternalProject)
 
@@ -22,10 +22,10 @@ ExternalProject_Add(googletest
   INSTALL_COMMAND ""
 
   # Wrap download, configure and build steps in a script to log output
-  LOG_DOWNLOAD ON
-  LOG_CONFIGURE ON
-  LOG_BUILD ON
-  LOG_INSTALL ON
+  LOG_DOWNLOAD ${OC_QUIET_EXTERNALPROJECT}
+  LOG_CONFIGURE ${OC_QUIET_EXTERNALPROJECT}
+  LOG_BUILD ${OC_QUIET_EXTERNALPROJECT}
+  LOG_INSTALL ${OC_QUIET_EXTERNALPROJECT}
 )
 
 # Specify include dir

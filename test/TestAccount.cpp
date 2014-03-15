@@ -1,25 +1,21 @@
-#include "opencash/model/Account.h"
+#include "opencash/core/Account.h"
+#include "opencash/core/Split.h"
 #include "mock/MockModelObserver.h"
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-using Account = opencash::model::Account;
-using AccountType = opencash::model::Account::AccountType;
-using AccountPtr = opencash::model::Account::AccountPtr;
+IMPORT_ALIAS(Account);
+IMPORT_ALIAS(Split);
 
 using InSequence = ::testing::InSequence;
 
-const std::string A_UUID = "a_uuid";
-const std::string ANOTHER_UUID = "another_uuid";
-const std::string YET_ANOTHER_UUID = "yet_another_uuid";
-
 TEST(TestAccount, shouldAllowOneParent) {
   // given
-  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAcc(new Account());
   parentAcc->setName("parent");
 
-  AccountPtr childAcc(new Account(ANOTHER_UUID));
+  AccountPtr childAcc(new Account());
   childAcc->setName("child");
 
   // when
@@ -31,13 +27,13 @@ TEST(TestAccount, shouldAllowOneParent) {
 
 TEST(TestAccount, shouldAllowMultipleChildren) {
   // given
-  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAcc(new Account());
   parentAcc->setName("parent");
 
-  AccountPtr childAcc1(new Account(ANOTHER_UUID));
+  AccountPtr childAcc1(new Account());
   childAcc1->setName("child1");
 
-  AccountPtr childAcc2(new Account(YET_ANOTHER_UUID));
+  AccountPtr childAcc2(new Account());
   childAcc2->setName("child2");
 
   // when
@@ -50,61 +46,50 @@ TEST(TestAccount, shouldAllowMultipleChildren) {
   ASSERT_EQ(2, parentAcc->getChildren().size());
 }
 
-TEST(TestAccount, shouldRemoveChildWhenSettingParentToNull) {
+TEST(TestAccount, shouldRemoveChildFromParentWhenUnsettingParent) {
   // given
-  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAcc(new Account());
   parentAcc->setName("parent");
 
-  AccountPtr childAcc1(new Account(ANOTHER_UUID));
+  AccountPtr childAcc1(new Account());
   childAcc1->setName("child1");
 
-  AccountPtr childAcc2(new Account(YET_ANOTHER_UUID));
+  AccountPtr childAcc2(new Account());
   childAcc2->setName("child2");
 
   // when
   childAcc1->setParent(parentAcc);
   childAcc2->setParent(parentAcc);
-  childAcc1->setParent(NULL);
+  childAcc1->unsetParent();
 
   // then
   ASSERT_EQ(childAcc2, parentAcc->getChildren().at(0).lock());
   ASSERT_EQ(1, parentAcc->getChildren().size());
 }
 
-TEST(TestAccount, shouldCompareEqualityBasedOnlyOnUuid) {
-  // given
-  Account a1(A_UUID);
-  a1.setName("a1");
+TEST(TestTransaction, shouldAddSplitIntoAccount) {
+  //given
+  AccountPtr account(new Account());
+  SplitPtr split1(new Split());
+  SplitPtr split2(new Split());
 
-  Account a2(A_UUID);
-  a2.setName("a2");
+  //when
+  account->addSplit(split1);
+  account->addSplit(split2);
 
-  Account another1(ANOTHER_UUID);
-  another1.setName("another1");
-
-  Account another2(ANOTHER_UUID);
-  another2.setName("another2");
-
-  Account a1DiffUuid(ANOTHER_UUID);
-  a1DiffUuid.setName("a1");
-
-  // when
-
-  // then
-  ASSERT_TRUE(a1 == a1);
-  ASSERT_TRUE(a1 == a2);
-  ASSERT_FALSE(a1 == another1);
-  ASSERT_FALSE(a1 == another2);
-  ASSERT_TRUE(another1 == another2);
-  ASSERT_FALSE(a1 == a1DiffUuid);
+  //then
+  const Splits& splits = account->getSplits();
+  ASSERT_EQ(2, splits.size());
+  ASSERT_EQ(split1, splits[0]);
+  ASSERT_EQ(split2, splits[1]);
 }
 
 TEST(TestAccount, shouldNotTriggerParentChangedWhenSettingToSameParent) {
   // given
-  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAcc(new Account());
   AccountPtr parentAccRef(parentAcc);
 
-  AccountPtr childAcc1(new Account(ANOTHER_UUID));
+  AccountPtr childAcc1(new Account());
   MockModelObserver childObs1(*childAcc1);
 
   {
@@ -122,9 +107,25 @@ TEST(TestAccount, shouldNotTriggerParentChangedWhenSettingToSameParent) {
   // mock expectations implicitly verified
 }
 
+TEST(TestAccount, shouldNotTriggerParentChangedWhenUnsettingParentIfAccountHasNoParent) {
+  AccountPtr accountWithoutParent(new Account());
+  MockModelObserver accountObserver(*accountWithoutParent);
+
+  EXPECT_CALL(accountObserver, willChange("parent"))
+		.Times(0);
+  EXPECT_CALL(accountObserver, didChange("parent"))
+		.Times(0);
+
+  // when
+  accountWithoutParent->unsetParent();
+
+  // then
+  // mock expectations implicitly verified
+}
+	
 TEST(TestAccount, shouldTriggerMemberObserverEvents) {
   // given
-  Account acc(A_UUID);
+  Account acc;
   MockModelObserver obs(acc);
 
   {
@@ -143,7 +144,7 @@ TEST(TestAccount, shouldTriggerMemberObserverEvents) {
   // when
   acc.setName("A name");
   acc.setDescr("A descr");
-  acc.setType(AccountType::Asset);
+  acc.setType(Account::AccountType::Asset);
 
   // then
   // mock expectations implicitly verified
@@ -151,18 +152,18 @@ TEST(TestAccount, shouldTriggerMemberObserverEvents) {
 
 TEST(TestAccount, shouldTriggerParentChildrenObserverEvents) {
   // given
-  AccountPtr parentAcc(new Account(A_UUID));
+  AccountPtr parentAcc(new Account());
   MockModelObserver parentObs(*parentAcc);
 
-  AccountPtr childAcc1(new Account(ANOTHER_UUID));
+  AccountPtr childAcc1(new Account());
   MockModelObserver childObs1(*childAcc1);
 
-  AccountPtr childAcc2(new Account(YET_ANOTHER_UUID));
+  AccountPtr childAcc2(new Account());
   MockModelObserver childObs2(*childAcc2);
 
   {
-    using opencash::model::ObservableModel::ChangeType::Insertion;
-    using opencash::model::ObservableModel::ChangeType::Removal;
+    using opencash::core::ObservableModel::ChangeType::Insertion;
+    using opencash::core::ObservableModel::ChangeType::Removal;
 
     InSequence dummy;
 
@@ -190,8 +191,8 @@ TEST(TestAccount, shouldTriggerParentChildrenObserverEvents) {
   // when
   childAcc1->setParent(parentAcc);
   childAcc2->setParent(parentAcc);
-  childAcc2->setParent(NULL);
-  childAcc1->setParent(NULL);
+  childAcc2->unsetParent();
+  childAcc1->unsetParent();
 
   // then
   // mock expectations implicitly verified
