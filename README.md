@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/opencash/libopencash.png?branch=master)](https://travis-ci.org/opencash/libopencash)
+
 #### EARLY STAGE
 
 Please note that `libopencash` (and more broadly, OpenCash) is in a very early stage of development. The current focus lies on getting infrastructure set up and cross-platform issues sorted out. The actual functionality is still very limited.
