@@ -1,11 +1,14 @@
-language: cpp
+language: objective-c
+
 install:
-  - ./travis-diagnostics.sh
-  - sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update
-  - sudo apt-get install gcc-4.7 g++-4.7
-  - sudo rm -f /usr/bin/{gcc,g++}
-  - sudo ln -s /usr/bin/gcc-4.7 /usr/bin/gcc
-  - sudo ln -s /usr/bin/g++-4.7 /usr/bin/g++
-  - ./travis-diagnostics.sh
-script: "./gradlew --no-color -q describe test"
+- travis/install.sh
+script:
+- ./build.sh
+after_success:
+- travis/after_success.sh
+after_script:
+- travis/after_script.sh
+
+env:
+  global:
+    secure: EFiIcrqb7rxeW9kz89obuo1KwIUrNHHpeHXSOvk9obeomg1ccnHUDb6ItlmBqvaZxSxwooy4Hx5jDOFqcJGPTG1SBs4esTN+PZ0bQc7u2qKRdHTapxNGQAwLJLQYCt9/kl4/YPMLlm0nVRMVOqUCHRtip+aIjpj63ATLKik//Ck=

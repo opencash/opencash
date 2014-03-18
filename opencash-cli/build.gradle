@@ -6,23 +6,34 @@ buildscript {
     }
 
     dependencies {
-        classpath "me.sgeb.gradle.plugins:gradle-android-arm-clang-plugin:0.1.0"
-        classpath "me.sgeb.gradle:gradle-native-artifacts-plugin:1.0.0"
+        classpath "me.sgeb.gradle:gradle-native-artifacts-plugin:1.1.0-SNAPSHOT"
     }
 }
 
+def localIvyRepoUri = uri("$rootProject.projectDir/../local_ivy_repo")
+if (System.env.IVY_REPO_DIR) { localIvyRepoUri = System.env.IVY_REPO_DIR }
+
 apply plugin: 'cpp'
-apply plugin: 'android-arm-clang'
 apply plugin: 'native-artifacts'
+apply plugin: 'ivy-publish'
 
 group "com.github.opencash"
 version "0.1.0"
 status "integration"
 
+repositories {
+    ivy {
+        url "https://opencash.github.io/ivy_repo/"
+    }
+    ivy {
+        url localIvyRepoUri
+    }
+}
+
 model {
     platforms {
         "osx-x86_64" {
-            operatingSystem "mac os x"
+            operatingSystem "osx"
             architecture "x86_64"
         }
 
@@ -41,9 +52,35 @@ model {
         debug
         release
     }
+
+    toolChains {
+        gcc(Gcc)
+        clang(Clang)
+
+        "linux-amd64"(Gcc) {
+            def prefix = "x86_64-pc-linux-"
+            CCompiler.executable         = prefix + CCompiler.executable
+            cppCompiler.executable       = prefix + cppCompiler.executable
+            assembler.executable         = prefix + assembler.executable
+            linker.executable            = prefix + linker.executable
+            staticLibArchiver.executable = prefix + staticLibArchiver.executable
+
+            addPlatformConfiguration(new LinuxAmd64Configuration())
+        }
+
+        "android-arm"(Gcc) {
+            def prefix = "arm-linux-androideabi-"
+            CCompiler.executable         = prefix + CCompiler.executable
+            cppCompiler.executable       = prefix + cppCompiler.executable
+            assembler.executable         = prefix + assembler.executable
+            linker.executable            = prefix + linker.executable
+            staticLibArchiver.executable = prefix + staticLibArchiver.executable
+
+            addPlatformConfiguration(new AndroidArmConfiguration())
+        }
+    }
 }
 
-libraries.all { ext.purpose = null }
 libraries {
     cliLib {
         binaries.all {
@@ -70,6 +107,7 @@ executables {
 
             cppCompiler.args "-I${projectDir}/src/featuretests/cpp/vendor"
             cppCompiler.args "-I${projectDir}/src/cli/cpp"
+
             lib libraries.cliLib.static
         }
     }
@@ -99,50 +137,65 @@ sources {
     }
 }
 
-binaries.all {
-    // add include and lib paths
-    if (toolChain in Gcc || toolChain in Clang) {
-        cppCompiler.args "-I${it.narDepsDir}/include"
-        linker.args "-L${it.narDepsDir}/lib"
-    }
-
-    // add debug flags
-    if (buildType == buildTypes.debug) {
-        if (toolChain in Gcc || toolChain in Clang) {
-            cppCompiler.args "-g"
-        }
-        if (toolChain in VisualCpp) {
-            cppCompiler.args '/Zi'
-            cppCompiler.define 'DEBUG'
-            linker.args '/DEBUG'
-        }
-    }
-
-    // add release flags
-    if (buildType == buildTypes.release) {
-        if (toolChain in Gcc || toolChain in Clang) {
-            cppCompiler.args "-O2"
-        }
-    }
-
-    // add c++11 flags
+binaries.all { binary ->
     if (toolChain in Gcc || toolChain in Clang) {
         cppCompiler.args "-std=c++11"
+        cppCompiler.args "-I${binary.narDepsDir}/include"
+
+        // Mac OS X must build with libc++
+        if (targetPlatform.operatingSystem.macOsX) {
+            cppCompiler.args "-stdlib=libc++"
+            linker.args "-lc++"
+        }
+
+        if (buildType == buildTypes.debug) {
+            cppCompiler.args "-g"
+        }
+
+        if (buildType == buildTypes.release) {
+            cppCompiler.args "-O2"
+        }
+
+        linker.args "-L${binary.narDepsDir}/lib"
+    }
+}
+
+nativeArtifacts {
+    cli {
+        from (executables.cli) {
+            it.buildType == buildTypes.debug
+        }
+    }
+}
+
+publishing {
+    publications {
+        cli(IvyPublication) {
+            from nativeArtifacts.cli
+        }
+    }
+
+    repositories {
+        ivy {
+            url localIvyRepoUri
+        }
     }
 }
 
 task build {
     description "Builds all binaries on all buildable platforms."
-    dependsOn binaries.matching { it.buildable }
+    dependsOn binaries.matching { it.buildable && !(it instanceof SharedLibraryBinary) }
 }
 
 task test {
     description "Builds and runs all tests for current platform."
+
     def testExecutables = binaries.withType(ExecutableBinary).matching {
         it.component.purpose == "test" &&
             it.targetPlatform.operatingSystem.current &&
             it.targetPlatform.architecture.name == System.properties['os.arch']
     }
+
     dependsOn testExecutables
 
     doLast {
@@ -188,3 +241,77 @@ task wrapper(type: Wrapper) {
 }
 
 defaultTasks("tasks")
+
+//////////////////////////////////////////////////////////////////////////////
+
+class LinuxAmd64Configuration implements TargetPlatformConfiguration {
+    boolean supportsPlatform(Platform platform) {
+        return platform.operatingSystem.linux && platform.architecture.amd64
+    }
+
+    List<String> getCCompilerArgs() {
+        []
+    }
+
+    List<String> getCppCompilerArgs() {
+        []
+    }
+
+    List<String> getObjectiveCCompilerArgs() {
+        []
+    }
+
+    List<String> getObjectiveCppCompilerArgs() {
+        []
+    }
+
+    List<String> getAssemblerArgs() {
+        []
+    }
+
+    List<String> getLinkerArgs() {
+        []
+    }
+
+    List<String> getStaticLibraryArchiverArgs() {
+        []
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+class AndroidArmConfiguration implements TargetPlatformConfiguration {
+    boolean supportsPlatform(Platform platform) {
+        return platform.operatingSystem.linux &&
+            platform.architecture.arm &&
+            platform.name.toLowerCase().contains("android")
+    }
+
+    List<String> getCCompilerArgs() {
+        []
+    }
+
+    List<String> getCppCompilerArgs() {
+        []
+    }
+
+    List<String> getObjectiveCCompilerArgs() {
+        []
+    }
+
+    List<String> getObjectiveCppCompilerArgs() {
+        []
+    }
+
+    List<String> getAssemblerArgs() {
+        []
+    }
+
+    List<String> getLinkerArgs() {
+        []
+    }
+
+    List<String> getStaticLibraryArchiverArgs() {
+        []
+    }
+}
