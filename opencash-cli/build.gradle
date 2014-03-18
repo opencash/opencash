@@ -82,7 +82,7 @@ model {
 }
 
 libraries {
-    cliLib {
+    clishared {
         binaries.all {
             cppCompiler.args "-I${projectDir}/src/cli/cpp/vendor"
         }
@@ -93,10 +93,6 @@ executables.all { ext.purpose = null }
 executables {
     cli {
         baseName 'opencash'
-
-        binaries.all {
-            lib libraries.cliLib.static
-        }
     }
 
     featureTests {
@@ -107,14 +103,18 @@ executables {
 
             cppCompiler.args "-I${projectDir}/src/featuretests/cpp/vendor"
             cppCompiler.args "-I${projectDir}/src/cli/cpp"
+        }
+    }
 
-            lib libraries.cliLib.static
+    all {
+        binaries.all {
+            lib libraries.clishared.static
         }
     }
 }
 
 sources {
-    cliLib {
+    clishared {
         cpp {
             source.srcDirs = ['src/cli/cpp']
             source.include "**/*.cpp"
