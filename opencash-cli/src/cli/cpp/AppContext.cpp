@@ -6,9 +6,9 @@ namespace opencash { namespace cli {
     cout(cout),
     cerr(cerr),
     error(cerr),
-    errorPrefixBuf("[!] ", cerr.rdbuf())
+    errorPrefixedBuf("[!] ", cerr.rdbuf())
   {
-    error.rdbuf(&errorPrefixBuf);
+    error.rdbuf(&errorPrefixedBuf);
   }
 
   Options& AppContext::getOptions() {

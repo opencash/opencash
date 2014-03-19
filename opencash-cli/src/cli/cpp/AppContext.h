@@ -2,7 +2,7 @@
 #define __OC_CLI_APPCONTEXT_H_
 
 #include "Options.h"
-#include "PrependStreamBuf.h"
+#include "PrefixedStreamBuf.h"
 
 #include <iostream>
 
@@ -22,7 +22,7 @@ namespace opencash { namespace cli {
 
     private:
       Options _options;
-      PrefixStreamBuf errorPrefixBuf;
+      PrefixedStreamBuf errorPrefixedBuf;
   };
 
 }}

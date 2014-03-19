@@ -1,13 +1,13 @@
-#ifndef __OC_CLI_PREPENDSTREAMBUF_H_
-#define __OC_CLI_PREPENDSTREAMBUF_H_
+#ifndef __OC_CLI_PREFIXEDSTREAMBUF_H_
+#define __OC_CLI_PREFIXEDSTREAMBUF_H_
 
 #include <streambuf>
 
 namespace opencash { namespace cli {
 
-  class PrefixStreamBuf: public std::streambuf {
+  class PrefixedStreamBuf : public std::streambuf {
     public:
-      PrefixStreamBuf(std::string prefix, std::streambuf* delegate);
+      PrefixedStreamBuf(std::string prefix, std::streambuf* delegate);
 
     protected:
       virtual int_type overflow(int_type c);
