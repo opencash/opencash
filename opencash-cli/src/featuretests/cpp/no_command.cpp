@@ -6,7 +6,7 @@ using namespace igloo;
 
 using Cli = opencash::cli::Cli;
 
-Context(default_command)
+Context(no_command)
 {
   Spec(should_print_version)
   {

@@ -8,6 +8,7 @@ namespace opencash { namespace cli {
 
   class Options {
     public:
+      Options();
       const std::string toString();
 
       const std::string& getCommand() const;

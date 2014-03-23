@@ -54,7 +54,7 @@ namespace opencash { namespace cli {
       // command
 
       std::vector<std::string> commands;
-      commands.push_back("kickstart");
+      commands.push_back("sample");
       TCLAP::ValuesConstraint<std::string> availCommands(commands);
 
       TCLAP::UnlabeledValueArg<std::string> commandArg("command",

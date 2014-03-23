@@ -23,10 +23,10 @@ status "integration"
 
 repositories {
     ivy {
-        url "https://opencash.github.io/ivy_repo/"
+        url localIvyRepoUri
     }
     ivy {
-        url localIvyRepoUri
+        url "https://opencash.github.io/ivy_repo/"
     }
 }
 
@@ -95,20 +95,46 @@ executables {
         baseName 'opencash'
     }
 
+    unitTests {
+        purpose = "test"
+
+        binaries.all { binary ->
+            def myPlatform = binary.targetPlatform.name
+            project.dependencies {
+                add binary.narConfName,
+                    [group: "com.github.opencash.vendor", name: "gtest",
+                        version: "1.7.0", configuration: myPlatform]
+
+                add binary.narConfName,
+                    [group: "com.github.opencash.vendor", name: "gmock",
+                        version: "1.7.0", configuration: myPlatform]
+            }
+
+            linker.args '-lopencash'
+            linker.args '-lgtest'
+            linker.args '-lgtest_main'
+            linker.args '-lgmock'
+        }
+    }
+
     featureTests {
         purpose = "test"
 
         binaries.all {
-            targetBuildTypes "debug"
-
             cppCompiler.args "-I${projectDir}/src/featuretests/cpp/vendor"
-            cppCompiler.args "-I${projectDir}/src/cli/cpp"
         }
     }
 
     all {
         binaries.all {
             lib libraries.clishared.static
+        }
+    }
+
+    matching { it.purpose == "test" }.all {
+        binaries.all {
+            targetBuildTypes "debug"
+            cppCompiler.args "-I${projectDir}/src/cli/cpp"
         }
     }
 }
@@ -129,6 +155,13 @@ sources {
         }
     }
 
+    unitTests {
+        cpp {
+            source.srcDirs = ['src/unittests/cpp']
+            source.include "**/*.cpp"
+        }
+    }
+
     featureTests {
         cpp {
             source.srcDirs = ['src/featuretests/cpp']
@@ -138,6 +171,13 @@ sources {
 }
 
 binaries.all { binary ->
+  def myPlatform = binary.targetPlatform.name
+    project.dependencies {
+      add binary.narConfName,
+          [group: "com.github.opencash", name: "libopencash",
+            version: "0.1.0", configuration: "$myPlatform-static-debug"]
+    }
+
     if (toolChain in Gcc || toolChain in Clang) {
         cppCompiler.args "-std=c++11"
         cppCompiler.args "-I${binary.narDepsDir}/include"
@@ -200,7 +240,12 @@ task test {
 
     doLast {
         testExecutables.all { test ->
-            exec { commandLine test.executableFile }
+            exec {
+              logger.quiet ""
+              logger.quiet ">>> Testing `${relativePath test.executableFile}`"
+              logger.quiet ""
+              commandLine test.executableFile
+            }
         }
     }
 }

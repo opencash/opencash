@@ -4,6 +4,11 @@
 
 namespace opencash { namespace cli {
 
+  Options::Options() {
+    _command = "";
+    _verbosity = 0;
+  }
+
   const std::string Options::toString() {
     std::stringstream ss;
 
