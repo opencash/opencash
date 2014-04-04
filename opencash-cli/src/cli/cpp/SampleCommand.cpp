@@ -1,7 +1,7 @@
 #include "SampleCommand.h"
 #include "definitions.h"
 
-#include <opencash/core/Api.h>
+#include <opencash/api/Api.h>
 
 #include <string>
 #include <tclap/CmdLine.h>
@@ -18,7 +18,7 @@ namespace opencash { namespace cli {
   };
 
   SampleCommand::SampleCommand(AppContext& ctx,
-      const core::Api& api)
+      const api::Api& api)
     :
       _ctx(ctx),
       _api(api)

@@ -3,7 +3,7 @@
 
 #include "AppContext.h"
 
-namespace opencash { namespace core {
+namespace opencash { namespace api {
   class Api;
 }}
 
@@ -13,7 +13,7 @@ namespace opencash { namespace cli {
     public:
       SampleCommand(
           AppContext& ctx,
-          const core::Api& api);
+          const api::Api& api);
       int run(int argc, const char** argv);
 
     private:
@@ -21,7 +21,7 @@ namespace opencash { namespace cli {
 
     private:
       AppContext& _ctx;
-      const core::Api& _api;
+      const api::Api& _api;
       std::string _outputFileName;
   };
 

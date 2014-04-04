@@ -3,12 +3,12 @@
 using namespace testing;
 
 #include "SampleCommand.h"
-#include <opencash/core/Api.h>
+#include <opencash/api/Api.h>
 
 using SampleCommand = opencash::cli::SampleCommand;
 using AppContext = opencash::cli::AppContext;
 
-class MockApi : public opencash::core::Api {
+class MockApi : public opencash::api::Api {
   public:
     MOCK_CONST_METHOD1(createSampleFile, void(const std::string& outputFileName));
 };

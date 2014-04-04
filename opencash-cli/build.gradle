@@ -111,6 +111,7 @@ executables {
             }
 
             linker.args '-lopencash'
+            linker.args '-lPocoFoundation'
             linker.args '-lgtest'
             linker.args '-lgtest_main'
             linker.args '-lgmock'
