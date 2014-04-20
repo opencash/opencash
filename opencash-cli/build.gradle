@@ -125,14 +125,19 @@ executables {
     }
 
     all {
-        binaries.all {
+        binaries.all { binary ->
             lib libraries.clishared.static
 
+            linker.args '-lopencash'
             linker.args '-lPocoFoundation'
             linker.args '-lodb-sqlite'
-            linker.args '-lsqlite3'
             linker.args '-lodb'
-            linker.args '-lopencash'
+            linker.args '-lsqlite3'
+
+            if (binary.targetPlatform in platforms."linux-amd64") {
+                linker.args '-lpthread'
+                linker.args '-ldl'
+            }
         }
     }
 
@@ -245,10 +250,14 @@ task test {
 
     doLast {
         testExecutables.all { test ->
+            def tempDir = new File(temporaryDir, test.executableFile.name)
+            tempDir.mkdirs()
             exec {
               logger.quiet ""
               logger.quiet ">>> Testing `${relativePath test.executableFile}`"
+              logger.quiet ">>> in dir `${tempDir}`"
               logger.quiet ""
+              workingDir tempDir
               commandLine test.executableFile
             }
         }
