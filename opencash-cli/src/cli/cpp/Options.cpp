@@ -5,7 +5,6 @@
 namespace opencash { namespace cli {
 
   Options::Options() {
-    _command = "";
     _verbosity = 0;
   }
 
@@ -13,19 +12,26 @@ namespace opencash { namespace cli {
     std::stringstream ss;
 
     ss << "{" << std::endl;
-    ss << "command = \"" << getCommand() << "\"" << std::endl;
-    ss << "verbosity = " << getVerbosity() << std::endl;
+    ss << "  commandArgs = {" << std::endl;
+    for (auto arg : getCommandArgs()) {
+      ss << "    \"" << arg << "\"" << std::endl;
+    }
+    ss << "  }" << std::endl;
+    ss << "  verbosity = " << getVerbosity() << std::endl;
     ss << "}" << std::endl;
 
     return ss.str();
   }
 
-  const std::string& Options::getCommand() const {
-    return _command;
+  const std::vector<std::string>& Options::getCommandArgs() const {
+    return _commandArgs;
   }
 
-  void Options::setCommand(std::string command) {
-    _command = command;
+  void Options::setCommandArgs(const std::vector<std::string>& args) {
+    _commandArgs.clear();
+    for (auto arg : args) {
+      _commandArgs.push_back(arg);
+    }
   }
 
   int Options::getVerbosity() const {

@@ -22,30 +22,26 @@ namespace opencash { namespace cli {
     :
       _ctx(ctx),
       _api(api)
-  {}
+  { }
 
-  int SampleCommand::run(int argc, const char **argv) {
+  SampleCommand::~SampleCommand() { }
+
+  int SampleCommand::run(const std::vector<std::string>& args) {
     std::ostream& cout(_ctx.cout);
-    Options& options(_ctx.getOptions());
 
     try {
-      parseOptions(argc, argv);
+      parseOptions(args);
     }
     catch (ExitException& e) {
       return e.getExitStatus();
     }
 
-    if (options.getVerbosity() >= 2) {
-      cout << "Command line options:" << std::endl;
-      cout << options.toString() << std::endl;
-    }
-
+    cout << "Creating sample at '" << _outputFileName << "'" << std::endl;
     _api.createSampleFile(_outputFileName);
-
     return 0;
   }
 
-  void SampleCommand::parseOptions(int argc, const char** argv) {
+  void SampleCommand::parseOptions(const std::vector<std::string>& args) {
     try {
       TCLAP::CmdLine parser(
           "OpenCash, a free open-source accounting software.",
@@ -57,7 +53,10 @@ namespace opencash { namespace cli {
 
       // TCLAP should rethrow any exceptions while parsing
       parser.setExceptionHandling(false);
-      parser.parse(argc, argv);
+
+      // parse (needs copy because it modifies the vector)
+      std::vector<std::string> argsCopy(args);
+      parser.parse(argsCopy);
 
       // retrieve values
       _outputFileName = outputFileNameArg.getValue();

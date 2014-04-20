@@ -25,12 +25,11 @@ TEST(SampleCommand, shouldDelegateToApiCreateSampleFile) {
   // given
   AppContext ctx;
   MockApi mockApi;
-  const int argc = 3;
-  const char *argv[] = {"sample", "-o", "sample.opencash"};
+  const std::vector<std::string> args({"sample", "-o", "sample.opencash"});
 
   // expect
   EXPECT_CALL(mockApi, mockCreateSampleFile("sample.opencash"));
 
   // when
-  SampleCommand(ctx, mockApi).run(argc, argv);
+  SampleCommand(ctx, mockApi).run(args);
 }

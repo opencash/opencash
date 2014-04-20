@@ -11,13 +11,12 @@ namespace opencash { namespace cli {
 
   class SampleCommand {
     public:
-      SampleCommand(
-          AppContext& ctx,
-          const api::Api& api);
-      int run(int argc, const char** argv);
+      SampleCommand(AppContext& ctx, const api::Api& api);
+      virtual ~SampleCommand();
+      virtual int run(const std::vector<std::string>& args);
 
     private:
-      void parseOptions(int argc, const char** argv);
+      void parseOptions(const std::vector<std::string>& args);
 
     private:
       AppContext& _ctx;

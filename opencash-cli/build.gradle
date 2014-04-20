@@ -110,11 +110,6 @@ executables {
                         version: "1.7.0", configuration: myPlatform]
             }
 
-            linker.args '-lPocoFoundation'
-            linker.args '-lodb-sqlite'
-            linker.args '-lsqlite3'
-            linker.args '-lodb'
-            linker.args '-lopencash'
             linker.args '-lgtest'
             linker.args '-lgtest_main'
             linker.args '-lgmock'
@@ -132,6 +127,12 @@ executables {
     all {
         binaries.all {
             lib libraries.clishared.static
+
+            linker.args '-lPocoFoundation'
+            linker.args '-lodb-sqlite'
+            linker.args '-lsqlite3'
+            linker.args '-lodb'
+            linker.args '-lopencash'
         }
     }
 

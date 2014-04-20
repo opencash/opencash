@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 namespace opencash { namespace cli {
 
@@ -11,14 +12,14 @@ namespace opencash { namespace cli {
       Options();
       const std::string toString();
 
-      const std::string& getCommand() const;
-      void setCommand(std::string command);
+      const std::vector<std::string>& getCommandArgs() const;
+      void setCommandArgs(const std::vector<std::string>& args);
 
       int getVerbosity() const;
       void setVerbosity(int verbosity);
 
     private:
-      std::string _command;
+      std::vector<std::string> _commandArgs;
       int _verbosity;
   };
 
