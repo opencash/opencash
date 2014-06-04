@@ -262,33 +262,13 @@ class LinuxAmd64Configuration implements TargetPlatformConfiguration {
         return platform.operatingSystem.linux && platform.architecture.amd64
     }
 
-    List<String> getCCompilerArgs() {
-        []
-    }
-
-    List<String> getCppCompilerArgs() {
-        []
-    }
-
-    List<String> getObjectiveCCompilerArgs() {
-        []
-    }
-
-    List<String> getObjectiveCppCompilerArgs() {
-        []
-    }
-
-    List<String> getAssemblerArgs() {
-        []
-    }
-
-    List<String> getLinkerArgs() {
-        []
-    }
-
-    List<String> getStaticLibraryArchiverArgs() {
-        []
-    }
+    List<String> getCCompilerArgs() { [] }
+    List<String> getCppCompilerArgs() { [] }
+    List<String> getObjectiveCCompilerArgs() { [] }
+    List<String> getObjectiveCppCompilerArgs() { [] }
+    List<String> getAssemblerArgs() { [] }
+    List<String> getLinkerArgs() { [] }
+    List<String> getStaticLibraryArchiverArgs() { [] }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -300,31 +280,11 @@ class AndroidArmConfiguration implements TargetPlatformConfiguration {
             platform.name.toLowerCase().contains("android")
     }
 
-    List<String> getCCompilerArgs() {
-        []
-    }
-
-    List<String> getCppCompilerArgs() {
-        []
-    }
-
-    List<String> getObjectiveCCompilerArgs() {
-        []
-    }
-
-    List<String> getObjectiveCppCompilerArgs() {
-        []
-    }
-
-    List<String> getAssemblerArgs() {
-        []
-    }
-
-    List<String> getLinkerArgs() {
-        []
-    }
-
-    List<String> getStaticLibraryArchiverArgs() {
-        []
-    }
+    List<String> getCCompilerArgs() { [] }
+    List<String> getCppCompilerArgs() { [] }
+    List<String> getObjectiveCCompilerArgs() { [] }
+    List<String> getObjectiveCppCompilerArgs() { [] }
+    List<String> getAssemblerArgs() { [] }
+    List<String> getLinkerArgs() { [] }
+    List<String> getStaticLibraryArchiverArgs() { [] }
 }
